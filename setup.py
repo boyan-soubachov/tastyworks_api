@@ -7,7 +7,7 @@ REQUIRES = [
     'websockets==4.0.1',
 ]
 
-with open('README.txt') as file:
+with open('README.md') as file:
     long_desc = file.read()
 
 setup(
@@ -15,19 +15,21 @@ setup(
     author='Boyan Soubachov',
     author_email='boyanvs@gmail.com',
     url='http://pypi.python.org/pypi/tastyworks/',
-    version='0.1.1',
+    version='0.1.2',
     packages=find_packages(exclude=['main.py']),
     python_requires='>= 3.6.0',
     description='Tastyworks (unofficial) API',
     license='LICENSE.txt',
     long_description=long_desc,
+    long_description_content_type='text/markdown',
     install_requires=REQUIRES,
     entry_points={
         'console_scripts': ['tasty=tastyworks.example:main']
     },
     classifiers=(
+        "Development Status :: 3 - Alpha",
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: Apache License",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ),
 
