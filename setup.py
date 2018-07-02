@@ -15,7 +15,7 @@ setup(
     author='Boyan Soubachov',
     author_email='boyanvs@gmail.com',
     url='http://pypi.python.org/pypi/tastyworks/',
-    version='0.1.2',
+    version='0.2.0',
     packages=find_packages(exclude=['main.py']),
     python_requires='>= 3.6.0',
     description='Tastyworks (unofficial) API',
@@ -23,6 +23,7 @@ setup(
     long_description=long_desc,
     long_description_content_type='text/markdown',
     install_requires=REQUIRES,
+    keywords=['tastyworks', 'trading', 'api', 'algorithmic'],
     entry_points={
         'console_scripts': ['tasty=tastyworks.example:main']
     },

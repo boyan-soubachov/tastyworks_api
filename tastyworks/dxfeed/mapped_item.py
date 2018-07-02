@@ -46,7 +46,7 @@ class MappedItem(object):
 
     def _process_fields(self, data_dict: dict):
         """
-        Used to post-process fields in the element's dictionary. 
+        Used to post-process fields in the element's dictionary.
         e.g. convert Unix time to datetimes
         """
         return data_dict
