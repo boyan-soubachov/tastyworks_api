@@ -12,7 +12,7 @@ Please note that this is in the very early stages of development so any and all 
 
 ## Use
 ```
-$ pip install tastyworks
+pip install tastyworks
 ```
 ✨ 🍰
 
@@ -21,7 +21,7 @@ Since it's an async-based API, please make sure you're familiar with how asynchr
 An example use is provided in `example.py` in the `tastyworks` folder. See for yourself by adding your tastyworks username/password and running:
 
 ```
-$ tasty 
+tasty 
 ```
 
 ## Contributing
