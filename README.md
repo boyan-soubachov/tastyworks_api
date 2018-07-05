@@ -30,3 +30,7 @@ The more hands and brains that can help with this project, the better. It was im
 I would appreciate any input (be it in the form of issue reporting or code) on how to make this code-base better.
 
 You can find the official GitHub repo at: https://github.com/boyan-soubachov/tastyworks_api
+
+## TODO
+
+I would really appreciate any help/contributions with the TODO's scattered all around the codebase. If they're not descriptive enough, I'd be happy to provide more details.

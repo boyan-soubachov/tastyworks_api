@@ -3,11 +3,12 @@ from setuptools import setup, find_packages
 
 REQUIRES = [
     'aiohttp==3.2.1',
+    'dataclasses',
     'requests==2.18.4',
-    'websockets==4.0.1',
+    'websockets==6.0',
 ]
 
-with open('README.md','r',encoding='utf8') as file:
+with open('README.md', 'r', encoding='utf8') as file:
     long_desc = file.read()
 
 setup(
@@ -15,7 +16,7 @@ setup(
     author='Boyan Soubachov',
     author_email='boyanvs@gmail.com',
     url='http://pypi.python.org/pypi/tastyworks/',
-    version='0.2.0',
+    version='1.0.0',
     packages=find_packages(exclude=['main.py']),
     python_requires='>= 3.6.0',
     description='Tastyworks (unofficial) API',

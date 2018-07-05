@@ -1,12 +1,14 @@
 import asyncio
+import datetime
 import json
 import logging
 import threading
 
+import requests
 import websockets
 
 from tastyworks.dxfeed import mapper as dxfeed_mapper
-from tastyworks.tastyworks_api.tasty_session import TastyAPISession
+from tastyworks.models.session import TastyAPISession
 
 LOGGER = logging.getLogger(__name__)
 
@@ -16,24 +18,18 @@ LOGGER = logging.getLogger(__name__)
 # * Figure out how to remove stream subscriptions
 
 class DataStreamer(object):
-    def __init__(self, tasty_session: TastyAPISession, timeout=60):
-        # initiate with a tasty session object
-        if not tasty_session.session_valid():
+    def __init__(self, session: TastyAPISession, timeout=60):
+        if not session.session_valid():
             raise Exception('TastyWorks API session not valid')
-        self.tasty_api_session = tasty_session
+        self.tasty_session = session
         self.timeout = timeout
         self.connection = None
-        self.logged_in = False
+        self.streamer_logged_in = False
         self.subs = {}
         self.lock = asyncio.Lock()
         asyncio.get_event_loop().run_until_complete(
             self._setup_connection()
         )
-
-    def get_tasty_session(self):
-        if not self.tasty_api_session:
-            raise Exception('No active tastyworks API session attached to streamer, critical error!')
-        return self.tasty_api_session
 
     def __del__(self):
         self.ka_thread.join()  # Kill the keep-alive thread
@@ -42,10 +38,7 @@ class DataStreamer(object):
     def _get_nonce(self):
         # NOTE: It seems a mutex is not necessary as long as we
         # have no replay of messages (i.e. do not send with same/lower number)
-        if not hasattr(self, 'nonce'):
-            self.nonce = 1
-        else:
-            self.nonce = self.nonce + 1
+        self.nonce = getattr(self, 'nonce', 0) + 1
 
         return self.nonce
 
@@ -81,7 +74,7 @@ class DataStreamer(object):
         await self._send_msg(message)
 
     def _get_login_msg(self) -> str:
-        auth_token = self.tasty_api_session.get_streamer_token()
+        auth_token = self.get_streamer_token()
         return json.dumps([{
             'ext': {
                 'com.devexperts.auth.AuthToken': f'{auth_token}'
@@ -153,9 +146,34 @@ class DataStreamer(object):
         await self._send_msg(msg)
         await self.connection.recv()
 
+    def get_streamer_token(self):
+        return self._get_streamer_data()['data']['token']
+
+    def _get_streamer_data(self):
+        if not self.tasty_session.logged_in:
+            raise Exception('Logged in session required')
+
+        if hasattr(self, 'streamer_data_created') and (datetime.datetime.now() - self.streamer_data_created).total_seconds() < 60:
+            return self.streamer_data
+
+        resp = requests.get(f'{self.tasty_session.API_url}/quote-streamer-tokens', headers=self.tasty_session.get_request_headers())
+        if resp.status_code != 200:
+            raise Exception('Could not get quote streamer data, error message: {}'.format(
+                resp.json()['error']['message']
+            ))
+        self.streamer_data = resp.json()
+        self.streamer_data_created = datetime.datetime.now()
+        return resp.json()
+
+    def _get_streamer_websocket_url(self):
+        socket_url = self._get_streamer_data()['data']['websocket-url']
+        socket_url = socket_url.replace('https://', '')
+        full_url = 'wss://{}/cometd'.format(socket_url)
+        return full_url
+
     async def _setup_connection(self):
-        streamer_url = self.tasty_api_session.get_streamer_websocket_url()
-        logging.info('Connecting to url: %s', streamer_url)
+        streamer_url = self._get_streamer_websocket_url()
+        LOGGER.info('Connecting to url: %s', streamer_url)
         socket = await websockets.connect(streamer_url)
         # login
         LOGGER.debug('Sending login message: %s', self._get_login_msg())
