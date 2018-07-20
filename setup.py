@@ -7,7 +7,7 @@ REQUIRES = [
     'websockets==4.0.1',
 ]
 
-with open('README.md') as file:
+with open('README.md','r',encoding='utf8') as file:
     long_desc = file.read()
 
 setup(
