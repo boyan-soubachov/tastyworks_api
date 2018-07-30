@@ -19,8 +19,8 @@ LOGGER = logging.getLogger(__name__)
 
 class DataStreamer(object):
     def __init__(self, session: TastyAPISession, timeout=60):
-        if not session.session_valid():
-            raise Exception('TastyWorks API session not valid')
+        if not session.is_active():
+            raise Exception('TastyWorks API session not active/valid')
         self.tasty_session = session
         self.timeout = timeout
         self.connection = None

@@ -3,8 +3,10 @@ from enum import Enum
 from typing import List
 
 import aiohttp
+from dataclasses import dataclass
 
 from tastyworks.models.model import Model
+from tastyworks.models.option_leg import OptionLeg
 
 LOGGER = logging.getLogger(__name__)
 
@@ -14,7 +16,7 @@ class OrderType(Enum):
     MARKET = 'Market'
 
 
-class OrderEffect(Enum):
+class OrderPriceEffect(Enum):
     CREDIT = 'Credit'
     DEBIT = 'Debit'
 
@@ -26,89 +28,63 @@ class OrderStatus(Enum):
     EXPIRED = 'Expired'
 
 
+@dataclass
+class OrderDetails(object):
+    underlying_symbol: str
+    type: OrderType = None
+    time_in_force: str = 'Day'
+    price: float = None
+    price_effect: OrderPriceEffect = None
+    status: OrderStatus = None
+    legs: List[OptionLeg] = None
+    source: str = 'WBT'
+
+    def is_executable(self) -> bool:
+        required_data = all([
+            self.time_in_force,
+            self.price_effect,
+            self.price is not None,
+            self.type,
+            self.source
+        ])
+
+        if not required_data:
+            return False
+
+        if not self.legs:
+            return False
+
+        return True
+
+
 class Order(Model):
-    def __init__(self, account, price, price_effect, **kwargs):
+    def __init__(self, order_details: OrderDetails):
         """
         Initiates a new order object.
 
         Args:
-            account (TradingAccount): The trading account to execute on.
-            type (OrderType): The type of order to make.
-            price (float): The order price level (this is total, sum of all legs).
-            price_effect (OrderEffect): Whether this is a credit or debit order.
-            session
+            order_details (OrderDetails): An object specifying order-level details.
         """
-        self.id = kwargs['order_id'] if 'order_id' in kwargs else None
-        self.type = kwargs['type'] if 'type' in kwargs else OrderType.LIMIT
-        self.time_in_force = kwargs['time_in_force'] if 'time_in_force' in kwargs else "Day"
-        self.price = price
-        self.price_effect = price_effect
-        self.status = kwargs['status'] if 'status' in kwargs else None
-        self.account = account
-        self.session = None
-        self.legs = []
-        self.quantity = kwargs['quantity'] if 'quantity' in kwargs else 0
+        self.details = order_details
 
-    async def execute(self, dry_run=True):
-        """
-        Execute an order. If doing a dry run, the order isn't placed but simulated (server-side).
-
-        Args:
-            dry_run (bool): Whether to do a test (dry) run.
-
-        Returns:
-            bool: Whether the order was successful.
-            dict: Information about the order.
-        """
-        if not self.account:
-            raise Exception('Cannot execute an order without active trading accounts')
-
-        if not self.session.logged_in:
-            raise Exception('Cannot execute an order without a connected session')
-
-        url = '{}/accounts/{}/orders'.format(
-            self.session.API_url,
-            self.account.account_number
-        )
-        if dry_run:
-            url = f'{url}/dry-run'
-
-        # TODO: Complete this. We need to add models for order legs (aka option legs).
-        body = {
-            'source': 'WBT',
-            'order-type': self.type.value,
-            'price': str(self.price),
-            'price-effect': self.price_effect.value,
-            'time-in-force': self.time_in_force.value,
-            'legs': {}  # TODO: ...
-        }
-
-        async with aiohttp.request('POST', url, headers=self.session.get_request_headers(), body=body) as resp:
-            if resp.status not in (200, 201):
-                raise Exception('Could not execute a trade order successfully')
-            data = await resp.json()
-            self.status = OrderStatus(data['data']['order']['status'])
-
-            if self.status == OrderStatus.RECEIVED:
-                success = True
-            else:
-                success = False
-
-            return success, data
+    def check_is_order_executable(self):
+        return self.details.is_executable()
 
     @classmethod
     def from_dict(cls, session, account, input_dict: dict):
         """
         Parses an Order object from a dict.
         """
+        details = OrderDetails()
+        details.price = float(input_dict['price'])
+        details.price_effect = OrderPriceEffect(input_dict['price-effect'])
+        details.type = OrderType(input_dict['order-type'])
+        details.status = OrderStatus(input_dict['status'])
+        details.time_in_force = input_dict['time-in-force']
         return cls(
+            session=session,
             account=account,
-            price=float(input_dict['price']),
-            price_effect=OrderEffect(input_dict['price-effect']),
-            type=OrderType(input_dict['order-type']),
-            status=OrderStatus(input_dict['status']),
-            order_id=input_dict['id'],
-            time_in_force=input_dict['time-in-force']
+            order_details=details
         )
 
     @classmethod

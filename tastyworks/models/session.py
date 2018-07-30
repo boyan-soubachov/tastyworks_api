@@ -102,7 +102,7 @@ class TastyAPISession(object):
                 res[exp_date][strike_val] = item
         return res
 
-    def session_valid(self):
+    def is_active(self):
         return self._validate_session(self.session_token)
 
     async def _get_trading_accounts(self):
