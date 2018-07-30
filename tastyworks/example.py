@@ -1,9 +1,12 @@
 import asyncio
 import logging
 
-from tastyworks.streamer import DataStreamer
-from tastyworks.tastyworks_api import tasty_session
+from tastyworks.models.order import (Order, OrderDetails, OrderPriceEffect,
+                                     OrderType)
 from tastyworks.models.session import TastyAPISession
+from tastyworks.streamer import DataStreamer
+from tastyworks.models.trading_account import TradingAccount
+from tastyworks.tastyworks_api import tasty_session
 
 LOGGER = logging.getLogger(__name__)
 
@@ -19,11 +22,22 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
         "Quote": ["/ES"]
     }
 
-    # get all active orders
-    orders = await session.get_active_orders()
+    accounts = await TradingAccount.get_remote_accounts(session)
+    LOGGER.info('Trading accounts: %s', accounts)
+    acct = accounts[0]
+
+    orders = await Order.get_remote_orders(session, acct)
     LOGGER.info('Number of active orders: %s', len(orders))
 
-    # set up some streamers
+    details = OrderDetails(
+        underlying_symbol='AKS',
+        type=OrderType.LIMIT,
+        price=400,
+        price_effect=OrderPriceEffect.CREDIT)
+    new_order = Order(details)
+    # res = await acct.execute_order(new_order, session, dry_run=True)
+    # LOGGER.info('execute res: %s', res)
+
     await streamer.add_data_sub(sub_values)
 
     async for item in streamer.listen():
@@ -31,7 +45,7 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
 
 
 def main():
-    tasty_client = tasty_session.create_new_session('your_tastyworks_username', 'your_tastyworks_password')
+    tasty_client = tasty_session.create_new_session('your_username', 'your_password_here')
 
     streamer = DataStreamer(tasty_client)
     LOGGER.info('Streamer token: %s' % streamer.get_streamer_token())

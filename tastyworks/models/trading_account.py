@@ -1,3 +1,5 @@
+from typing import List
+
 import aiohttp
 from dataclasses import dataclass
 
@@ -50,3 +52,46 @@ class TradingAccount(object):
                 raise Exception('Order execution failed, message: {}'.format(await resp.text()))
             else:
                 raise Exception('Unknown remote error, status code: {}, message: {}'.format(resp.status, await resp.text()))
+
+    @classmethod
+    def from_dict(cls, data: dict) -> List:
+        """
+        Parses a TradingAccount object from a dict.
+        """
+        new_data = {
+            'is_margin': True if data['margin-or-cash'] == 'Margin' else False,
+            'account_number': data['account-number'],
+            'external_id': data['external-id']
+        }
+
+        res = TradingAccount(**new_data)
+
+        return res
+
+    @classmethod
+    async def get_remote_accounts(cls, session) -> List:
+        """
+        Gets all trading accounts from the Tastyworks platform.
+
+        Args:
+            session (TastyAPISession): An active and logged-in session object against which to query.
+
+        Returns:
+            list (TradingAccount): A list of trading accounts.
+        """
+        url = f'{session.API_url}/customers/me/accounts'
+        res = []
+
+        async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
+            if response.status != 200:
+                raise Exception('Could not get trading accounts info from Tastyworks...')
+            data = (await response.json())['data']
+
+        for entry in data['items']:
+            if entry['authority-level'] != 'owner':
+                continue
+            acct_data = entry['account']
+            acct = TradingAccount.from_dict(acct_data)
+            res.append(acct)
+
+        return res

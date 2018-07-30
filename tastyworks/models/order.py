@@ -71,7 +71,7 @@ class Order(Model):
         return self.details.is_executable()
 
     @classmethod
-    def from_dict(cls, session, account, input_dict: dict):
+    def from_dict(cls, input_dict: dict):
         """
         Parses an Order object from a dict.
         """
@@ -82,8 +82,6 @@ class Order(Model):
         details.status = OrderStatus(input_dict['status'])
         details.time_in_force = input_dict['time-in-force']
         return cls(
-            session=session,
-            account=account,
             order_details=details
         )
 
@@ -122,6 +120,6 @@ class Order(Model):
                 raise Exception('Could not get current open orders')
             data = (await resp.json())['data']['items']
             for order_data in data:
-                order = cls.from_dict(session, account, order_data)
+                order = cls.from_dict(order_data)
                 res.append(order)
         return res

@@ -19,31 +19,6 @@ class TastyAPISession(object):
         self.password = password
         self.logged_in = False
         self.session_token = self._get_session_token()
-        self.accounts = None
-        self._orders = None
-        self.streamers = None
-
-        # do setup functions here
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self._async_init())
-
-    async def _async_init(self):
-        self.accounts = await self._get_trading_accounts()
-
-    async def get_active_orders(self):
-        return await self._get_remote_orders(status=OrderStatus.RECEIVED)
-
-    async def _get_remote_orders(self, account_number=None, **kwargs):
-        if account_number and account_number not in self.accounts:
-            raise Exception('Could not find specified account number')
-        res = {}
-        for acct_number, acct in self.accounts.items():
-            if account_number and acct_number != account_number:
-                continue
-            res[acct_number] = []
-            orders = await Order.get_remote_orders(self, acct, **kwargs)
-            res[acct_number] = res[acct_number] + orders
-        return res
 
     def _get_session_token(self):
         if self.logged_in and self.session_token:
@@ -104,30 +79,6 @@ class TastyAPISession(object):
 
     def is_active(self):
         return self._validate_session(self.session_token)
-
-    async def _get_trading_accounts(self):
-        accounts = {}
-        url = f'{self.API_url}/customers/me/accounts'
-
-        async with aiohttp.request('GET', url, headers=self.get_request_headers()) as response:
-            if response.status != 200:
-                raise Exception('Could not get trading accounts info from Tastyworks...')
-            data = (await response.json())['data']
-
-        for entry in data['items']:
-            if entry['authority-level'] != 'owner':
-                continue
-            acct_data = entry['account']
-            acct = TradingAccount(
-                acct_data['account-number'],
-                acct_data['external-id'],
-                acct_data['margin-or-cash'] == 'Margin'
-            )
-            accounts[acct.account_number] = acct
-        return accounts
-
-    def get_trading_account_by_id(self, acct_id):
-        return self.accounts[acct_id]
 
     def _validate_session(self, session_token):
         resp = requests.post(f'{self.API_url}/sessions/validate', headers=self.get_request_headers())
