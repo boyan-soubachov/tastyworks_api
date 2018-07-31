@@ -1,11 +1,13 @@
 import asyncio
 import logging
+from datetime import date
 
+from tastyworks.models.option import Option, OptionType, OptionUnderlyingType
 from tastyworks.models.order import (Order, OrderDetails, OrderPriceEffect,
                                      OrderType)
 from tastyworks.models.session import TastyAPISession
-from tastyworks.streamer import DataStreamer
 from tastyworks.models.trading_account import TradingAccount
+from tastyworks.streamer import DataStreamer
 from tastyworks.tastyworks_api import tasty_session
 
 LOGGER = logging.getLogger(__name__)
@@ -23,8 +25,8 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
     }
 
     accounts = await TradingAccount.get_remote_accounts(session)
-    LOGGER.info('Trading accounts: %s', accounts)
     acct = accounts[0]
+    LOGGER.info('Accounts available: %s', accounts)
 
     orders = await Order.get_remote_orders(session, acct)
     LOGGER.info('Number of active orders: %s', len(orders))
@@ -35,8 +37,19 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
         price=400,
         price_effect=OrderPriceEffect.CREDIT)
     new_order = Order(details)
-    # res = await acct.execute_order(new_order, session, dry_run=True)
-    # LOGGER.info('execute res: %s', res)
+
+    opt = Option(
+        ticker='AKS',
+        quantity=1,
+        expiry=date(2018, 8, 10),
+        strike=3.5,
+        option_type=OptionType.CALL,
+        underlying_type=OptionUnderlyingType.EQUITY
+    )
+    new_order.add_leg(opt)
+
+    res = await acct.execute_order(new_order, session, dry_run=True)
+    LOGGER.info('Order executed successfully: %s', res)
 
     await streamer.add_data_sub(sub_values)
 

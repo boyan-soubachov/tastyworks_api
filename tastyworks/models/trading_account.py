@@ -3,7 +3,7 @@ from typing import List
 import aiohttp
 from dataclasses import dataclass
 
-from tastyworks.models.order import Order
+from tastyworks.models.order import Order, OrderPriceEffect
 
 
 @dataclass
@@ -11,6 +11,16 @@ class TradingAccount(object):
     account_number: str
     external_id: str
     is_margin: bool
+
+    def _get_legs_request_data(self, order):
+        res = []
+        order_effect = order.details.price_effect
+        order_effect_str = 'Sell to Open' if order_effect == OrderPriceEffect.CREDIT else 'Buy to Open'
+        for leg in order.details.legs:
+            leg_dict = {**leg.to_tasty_json(), 'action': order_effect_str}
+            res.append(leg_dict)
+        print(res)
+        return res
 
     async def execute_order(self, order: Order, session, dry_run=True):
         """
@@ -42,7 +52,7 @@ class TradingAccount(object):
             'price': str(order.details.price),
             'price-effect': order.details.price_effect.value,
             'time-in-force': order.details.time_in_force,
-            'legs': order.details.legs.asdict()
+            'legs': self._get_legs_request_data(order)
         }
 
         async with aiohttp.request('POST', url, headers=session.get_request_headers(), json=body) as resp:

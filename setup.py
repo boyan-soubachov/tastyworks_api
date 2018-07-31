@@ -8,6 +8,10 @@ REQUIRES = [
     'websockets==6.0',
 ]
 
+TEST_REQUIRES = [
+    'pytest'
+]
+
 with open('README.md', 'r', encoding='utf8') as file:
     long_desc = file.read()
 
@@ -16,7 +20,7 @@ setup(
     author='Boyan Soubachov',
     author_email='boyanvs@gmail.com',
     url='http://pypi.python.org/pypi/tastyworks/',
-    version='2.0.0',
+    version='2.1.0',
     packages=find_packages(exclude=['main.py']),
     python_requires='>= 3.6.0',
     description='Tastyworks (unofficial) API',
@@ -24,6 +28,9 @@ setup(
     long_description=long_desc,
     long_description_content_type='text/markdown',
     install_requires=REQUIRES,
+    extras_require={
+        'test': TEST_REQUIRES,
+    },
     keywords=['tastyworks', 'trading', 'api', 'algorithmic'],
     entry_points={
         'console_scripts': ['tasty=tastyworks.example:main']
