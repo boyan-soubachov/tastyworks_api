@@ -3,10 +3,10 @@ from enum import Enum
 from typing import List
 
 import aiohttp
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from tastyworks.models.model import Model
-from tastyworks.models.option_leg import OptionLeg
+from tastyworks.models.security import Security
 
 LOGGER = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class OrderDetails(object):
     price: float = None
     price_effect: OrderPriceEffect = None
     status: OrderStatus = None
-    legs: List[OptionLeg] = None
+    legs: List[Security] = field(default_factory=list)
     source: str = 'WBT'
 
     def is_executable(self) -> bool:
@@ -69,6 +69,9 @@ class Order(Model):
 
     def check_is_order_executable(self):
         return self.details.is_executable()
+
+    def add_leg(self, security: Security):
+        self.details.legs.append(security)
 
     @classmethod
     def from_dict(cls, input_dict: dict):

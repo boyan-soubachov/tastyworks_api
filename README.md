@@ -2,7 +2,7 @@
 
 ## Disclaimer
 
-This is an unofficial, reverse-engineered API for tastyworks. There is no implied warranty for any actions and results which arise from using it.
+This is an unofficial, reverse-engineered API for Tastyworks. There is no implied warranty for any actions and results which arise from using it.
 
 ## Purpose
 
