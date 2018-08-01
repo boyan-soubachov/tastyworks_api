@@ -29,7 +29,7 @@ setup(
     long_description_content_type='text/markdown',
     install_requires=REQUIRES,
     extras_require={
-        'test': TEST_REQUIRES,
+        'testing': TEST_REQUIRES,
     },
     keywords=['tastyworks', 'trading', 'api', 'algorithmic'],
     entry_points={
