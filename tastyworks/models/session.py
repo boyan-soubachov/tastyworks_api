@@ -1,12 +1,8 @@
-import asyncio
 import datetime
 import logging
 
 import aiohttp
 import requests
-
-from tastyworks.models.trading_account import TradingAccount
-from tastyworks.models.order import Order, OrderStatus
 
 
 LOGGER = logging.getLogger(__name__)
