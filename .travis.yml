@@ -6,8 +6,11 @@ python:
 install:
   - pip install -e .
   - pip install -e ".[testing]"
+  - pip install flake8
 
-script: pytest tests/
+script:
+  - flake8 tastyworks/
+  - pytest tests/
 
 deploy:
   provider: pypi
