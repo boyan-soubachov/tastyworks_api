@@ -1,9 +1,7 @@
 import datetime
 import logging
 
-import aiohttp
 import requests
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -37,41 +35,6 @@ class TastyAPISession(object):
         self.session_token = resp.json()['data']['session-token']
         self._validate_session(self.session_token)
         return self.session_token
-
-    async def get_option_chains(self, symbol: str) -> dict:
-        # NOTE: This guy may probably need to get refactored out into a sub-class of this one
-        # For now, this just returns dxFeed-compatible option names
-        async with aiohttp.request(
-            'GET',
-            f'{self.API_url}/option-chains/{symbol}/nested',
-            headers=self.get_request_headers()
-        ) as response:
-            if response.status != 200:
-                raise Exception(f'Could not find option chain for symbol {symbol}')
-            resp = await response.json()
-        res = {}
-        data = resp['data']['items'][0]
-        for exp in data['expirations']:
-            exp_date = datetime.datetime.strptime(exp['expiration-date'], '%Y-%m-%d')
-            exp_date_str = exp_date.strftime('%y%m%d')
-            res[exp_date] = {}
-            for strike in exp['strikes']:
-                strike_val = float(strike['strike-price'])
-
-                # remove .0 since dxFeed isn't happy about it
-                if strike_val.is_integer():
-                    strike_str = '{0:.0f}'.format(int(strike_val))
-                else:
-                    strike_str = '{0:.2f}'.format(strike_val)
-                    if strike_str[-1] == '0':
-                        strike_str = strike_str[:-1]
-
-                item = {
-                    'call': f'{symbol}{exp_date_str}C{strike_str}',
-                    'put': f'{symbol}{exp_date_str}P{strike_str}'
-                }
-                res[exp_date][strike_val] = item
-        return res
 
     def is_active(self):
         return self._validate_session(self.session_token)

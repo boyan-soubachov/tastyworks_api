@@ -3,14 +3,12 @@ from enum import Enum
 
 from dataclasses import dataclass
 
+from tastyworks.models.underlying import UnderlyingType
+
 
 class OptionType(Enum):
     PUT = 'P'
     CALL = 'C'
-
-
-class OptionUnderlyingType(Enum):
-    EQUITY = 'Equity Option'
 
 
 @dataclass
@@ -19,8 +17,12 @@ class Option(object):
     expiry: date
     strike: float
     option_type: OptionType
-    underlying_type: OptionUnderlyingType
+    underlying_type: UnderlyingType
     quantity: int = 1
+
+    def _get_underlying_type_string(self, underlying_type: UnderlyingType):
+        if underlying_type == UnderlyingType.EQUITY:
+            return 'Equity Option'
 
     def get_occ2010_symbol(self):
         strike_int, strike_dec = divmod(self.strike, 1)
@@ -33,6 +35,22 @@ class Option(object):
             type=self.option_type.value,
             strike_int=str(strike_int).zfill(5),
             strike_dec=str(strike_dec).zfill(3)
+        )
+        return res
+
+    def get_dxfeed_symbol(self):
+        if self.strike.is_integer():
+            strike_str = '{0:.0f}'.format(int(self.strike))
+        else:
+            strike_str = '{0:.2f}'.format(self.strike)
+            if strike_str[-1] == '0':
+                strike_str = strike_str[:-1]
+
+        res = '{ticker}{exp_date}{type}{strike}'.format(
+            ticker=self.ticker,
+            exp_date=self.expiry.strftime('%y%m%d'),
+            type=self.option_type.value,
+            strike=strike_str
         )
         return res
 

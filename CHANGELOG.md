@@ -4,9 +4,24 @@ All important and notable changes will be documented here.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2018-08-13
+
+### Added
+- Added a new, rewritten `get_option_chain` method to the `Underlying` model, which is inherited by
+    models like `Stock` and all other future representations of securities.
+- New `Security` model representing all securities (options and underlyings).
+- New `Underlying` model representing all underlyings (stocks, indices, ETFs).
+- New `OptionChain` model which represents an option chain (a collection of options). This should make
+    management of a list of related options (i.e. for a ticker) easier.
+
+### Removed
+- The `get_option_chains` function from the TastyAPISession.
+- The `Model` model
+
+
 ## [2.1.0] - 2018-07-31
 
-## Added
+### Added
 - Option model to store information about individual option legs
 - Ability to execute options successfully (the last missing bit was option legs)
 - Added first set of unit tests.

@@ -5,7 +5,6 @@ from typing import List
 import aiohttp
 from dataclasses import dataclass, field
 
-from tastyworks.models.model import Model
 from tastyworks.models.security import Security
 
 LOGGER = logging.getLogger(__name__)
@@ -26,6 +25,10 @@ class OrderStatus(Enum):
     CANCELLED = 'Cancelled'
     FILLED = 'Filled'
     EXPIRED = 'Expired'
+    LIVE = 'Live'
+
+    def is_active(self):
+        return self in (OrderStatus.LIVE, OrderStatus.RECEIVED)
 
 
 @dataclass
@@ -57,7 +60,7 @@ class OrderDetails(object):
         return True
 
 
-class Order(Model):
+class Order(Security):
     def __init__(self, order_details: OrderDetails):
         """
         Initiates a new order object.
@@ -78,7 +81,7 @@ class Order(Model):
         """
         Parses an Order object from a dict.
         """
-        details = OrderDetails()
+        details = OrderDetails(input_dict['underlying-symbol'])
         details.price = float(input_dict['price'])
         details.price_effect = OrderPriceEffect(input_dict['price-effect'])
         details.type = OrderType(input_dict['order-type'])
@@ -105,9 +108,7 @@ class Order(Model):
         if not session.logged_in:
             raise Exception('Tastyworks session not logged in.')
 
-        filters = kwargs or {
-            'status': OrderStatus.RECEIVED.value
-        }
+        filters = kwargs
         url = '{}/accounts/{}/orders'.format(
             session.API_url,
             account.account_number
@@ -124,5 +125,7 @@ class Order(Model):
             data = (await resp.json())['data']['items']
             for order_data in data:
                 order = cls.from_dict(order_data)
+                if not order.details.status.is_active():
+                    continue
                 res.append(order)
         return res

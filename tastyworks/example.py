@@ -2,11 +2,13 @@ import asyncio
 import logging
 from datetime import date
 
-from tastyworks.models.option import Option, OptionType, OptionUnderlyingType
+from tastyworks.models import option_chain, underlying
+from tastyworks.models.option import Option, OptionType
 from tastyworks.models.order import (Order, OrderDetails, OrderPriceEffect,
                                      OrderType)
 from tastyworks.models.session import TastyAPISession
 from tastyworks.models.trading_account import TradingAccount
+from tastyworks.models.underlying import UnderlyingType
 from tastyworks.streamer import DataStreamer
 from tastyworks.tastyworks_api import tasty_session
 
@@ -44,12 +46,18 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
         expiry=date(2018, 8, 10),
         strike=3.5,
         option_type=OptionType.CALL,
-        underlying_type=OptionUnderlyingType.EQUITY
+        underlying_type=UnderlyingType.EQUITY
     )
     new_order.add_leg(opt)
 
     res = await acct.execute_order(new_order, session, dry_run=True)
     LOGGER.info('Order executed successfully: %s', res)
+
+    # Get an options chain
+    undl = underlying.Underlying('AKS')
+
+    chain = await option_chain.get_option_chain(session, undl)
+    LOGGER.info('chain: %s', chain.get_all_strikes())
 
     await streamer.add_data_sub(sub_values)
 
