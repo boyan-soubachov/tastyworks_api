@@ -20,7 +20,7 @@ setup(
     author='Boyan Soubachov',
     author_email='boyanvs@gmail.com',
     url='http://pypi.python.org/pypi/tastyworks/',
-    version='2.2.0',
+    version='3.0.0',
     packages=find_packages(exclude=['main.py']),
     python_requires='>= 3.6.0',
     description='Tastyworks (unofficial) API',

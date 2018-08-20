@@ -33,8 +33,9 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
     orders = await Order.get_remote_orders(session, acct)
     LOGGER.info('Number of active orders: %s', len(orders))
 
+    # Execute an order
+
     details = OrderDetails(
-        underlying_symbol='AKS',
         type=OrderType.LIMIT,
         price=400,
         price_effect=OrderPriceEffect.CREDIT)
@@ -43,7 +44,7 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
     opt = Option(
         ticker='AKS',
         quantity=1,
-        expiry=date(2018, 8, 10),
+        expiry=date(2018, 8, 31),
         strike=3.5,
         option_type=OptionType.CALL,
         underlying_type=UnderlyingType.EQUITY
@@ -74,6 +75,8 @@ def main():
 
     try:
         loop.run_until_complete(main_loop(tasty_client, streamer))
+    except Exception as e:
+        LOGGER.exception('Exception in main loop')
     finally:
         # find all futures/tasks still running and wait for them to finish
         pending_tasks = [

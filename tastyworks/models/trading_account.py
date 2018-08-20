@@ -12,22 +12,13 @@ class TradingAccount(object):
     external_id: str
     is_margin: bool
 
-    def _get_legs_request_data(self, order):
-        res = []
-        order_effect = order.details.price_effect
-        order_effect_str = 'Sell to Open' if order_effect == OrderPriceEffect.CREDIT else 'Buy to Open'
-        for leg in order.details.legs:
-            leg_dict = {**leg.to_tasty_json(), 'action': order_effect_str}
-            res.append(leg_dict)
-        print(res)
-        return res
-
     async def execute_order(self, order: Order, session, dry_run=True):
         """
         Execute an order. If doing a dry run, the order isn't placed but simulated (server-side).
 
         Args:
             order (Order): The order object to execute.
+            session (TastyAPISession): The tastyworks session onto which to execute the order.
             dry_run (bool): Whether to do a test (dry) run.
 
         Returns:
@@ -46,14 +37,7 @@ class TradingAccount(object):
         if dry_run:
             url = f'{url}/dry-run'
 
-        body = {
-            'source': order.details.source,
-            'order-type': order.details.type.value,
-            'price': str(order.details.price),
-            'price-effect': order.details.price_effect.value,
-            'time-in-force': order.details.time_in_force,
-            'legs': self._get_legs_request_data(order)
-        }
+        body = _get_execute_order_json(order)
 
         async with aiohttp.request('POST', url, headers=session.get_request_headers(), json=body) as resp:
             if resp.status == 201:
@@ -104,4 +88,25 @@ class TradingAccount(object):
             acct = TradingAccount.from_dict(acct_data)
             res.append(acct)
 
+        return res
+
+
+def _get_execute_order_json(order: Order):
+    return {
+        'source': order.details.source,
+        'order-type': order.details.type.value,
+        'price': '{:.2f}'.format(order.details.price),
+        'price-effect': order.details.price_effect.value,
+        'time-in-force': order.details.time_in_force,
+        'legs': _get_legs_request_data(order)
+    }
+
+
+def _get_legs_request_data(order):
+        res = []
+        order_effect = order.details.price_effect
+        order_effect_str = 'Sell to Open' if order_effect == OrderPriceEffect.CREDIT else 'Buy to Open'
+        for leg in order.details.legs:
+            leg_dict = {**leg.to_tasty_json(), 'action': order_effect_str}
+            res.append(leg_dict)
         return res

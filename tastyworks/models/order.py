@@ -33,7 +33,6 @@ class OrderStatus(Enum):
 
 @dataclass
 class OrderDetails(object):
-    underlying_symbol: str
     type: OrderType = None
     time_in_force: str = 'Day'
     price: float = None

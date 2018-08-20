@@ -68,3 +68,12 @@ class TestOptionModel(unittest.TestCase):
     def test_get_underlying_type_string(self):
         res = self.test_option._get_underlying_type_string(UnderlyingType.EQUITY)
         self.assertEqual(res, 'Equity Option')
+
+    def test_to_tasty_json(self):
+        res = self.test_option.to_tasty_json()
+        expected_result = {
+            'instrument-type': 'Equity Option',
+            'symbol': 'AKS   180810C00003500',
+            'quantity': 1
+        }
+        self.assertDictEqual(res, expected_result)

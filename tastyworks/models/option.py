@@ -56,7 +56,7 @@ class Option(object):
 
     def to_tasty_json(self):
         res = {
-            'instrument-type': self.underlying_type.value,
+            'instrument-type': f'{self.underlying_type.value} Option',
             'symbol': self.get_occ2010_symbol(),
             'quantity': self.quantity
         }
