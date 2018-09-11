@@ -1,10 +1,10 @@
 # Problem addressed
 
-The problem/issue addressed by this PR is ...
+<!-- The problem/issue addressed by this PR is ... -->
 
 # Solution
 
-The problem was solved by...
+<!-- Solution description in here -->
 
 # Checklist
 
