@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 from enum import Enum
 
 from dataclasses import dataclass
@@ -15,7 +16,7 @@ class OptionType(Enum):
 class Option(object):
     ticker: str
     expiry: date
-    strike: float
+    strike: Decimal
     option_type: OptionType
     underlying_type: UnderlyingType
     quantity: int = 1

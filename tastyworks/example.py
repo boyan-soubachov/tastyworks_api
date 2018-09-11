@@ -44,8 +44,8 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
     opt = Option(
         ticker='AKS',
         quantity=1,
-        expiry=date(2018, 8, 31),
-        strike=3.5,
+        expiry=date(2018, 10, 19),
+        strike=3.0,
         option_type=OptionType.CALL,
         underlying_type=UnderlyingType.EQUITY
     )
@@ -58,7 +58,7 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
     undl = underlying.Underlying('AKS')
 
     chain = await option_chain.get_option_chain(session, undl)
-    LOGGER.info('chain: %s', chain.get_all_strikes())
+    LOGGER.info('Chain strikes: %s', chain.get_all_strikes())
 
     await streamer.add_data_sub(sub_values)
 

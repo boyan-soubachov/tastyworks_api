@@ -1,4 +1,5 @@
 import logging
+from decimal import Decimal
 from enum import Enum
 from typing import List
 
@@ -35,7 +36,7 @@ class OrderStatus(Enum):
 class OrderDetails(object):
     type: OrderType = None
     time_in_force: str = 'Day'
-    price: float = None
+    price: Decimal = None
     price_effect: OrderPriceEffect = None
     status: OrderStatus = None
     legs: List[Security] = field(default_factory=list)
@@ -81,7 +82,7 @@ class Order(Security):
         Parses an Order object from a dict.
         """
         details = OrderDetails(input_dict['underlying-symbol'])
-        details.price = float(input_dict['price'])
+        details.price = Decimal(input_dict['price'])
         details.price_effect = OrderPriceEffect(input_dict['price-effect'])
         details.type = OrderType(input_dict['order-type'])
         details.status = OrderStatus(input_dict['status'])

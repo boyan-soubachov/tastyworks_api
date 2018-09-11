@@ -1,5 +1,6 @@
 import logging
 from datetime import date, datetime
+from decimal import Decimal
 from typing import Dict, List
 
 import aiohttp
@@ -60,7 +61,7 @@ async def get_option_chain(session, underlying: Underlying, expiration: date = N
             continue
 
         for strike in exp['strikes']:
-            strike_val = float(strike['strike-price'])
+            strike_val = Decimal(strike['strike-price'])
             for option_types in OptionType:
                 new_option = Option(
                     ticker=underlying.ticker,
