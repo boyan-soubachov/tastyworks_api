@@ -40,7 +40,7 @@ class WatchlistGroup(object):
             wlist.name = entry['name']
             wlist.slug = entry['slug']
             self.watchlists[wlist.slug] = wlist
-            
+
         return self
 
 
