@@ -1,5 +1,6 @@
 import unittest
 from datetime import date
+from decimal import Decimal
 
 from tastyworks.models.option import Option, OptionType
 from tastyworks.models.underlying import UnderlyingType
@@ -11,7 +12,7 @@ class TestOptionModel(unittest.TestCase):
             ticker='AKS',
             quantity=1,
             expiry=date(2018, 8, 10),
-            strike=3.5,
+            strike=Decimal('3.5'),
             option_type=OptionType.CALL,
             underlying_type=UnderlyingType.EQUITY
         )
@@ -57,7 +58,7 @@ class TestOptionModel(unittest.TestCase):
         self.assertEqual(expected_result, res)
 
     def test_get_dxfeed_symbol(self):
-        expected_result = 'AKS180810C3.5'
+        expected_result = '.AKS180810C3.5'
         result = self.test_option.get_dxfeed_symbol()
         self.assertEqual(result, expected_result)
 

@@ -33,13 +33,13 @@ class TastyAPISession(object):
         self.logged_in = True
         self.logged_in_at = datetime.datetime.now()
         self.session_token = resp.json()['data']['session-token']
-        self._validate_session(self.session_token)
+        self._validate_session()
         return self.session_token
 
     def is_active(self):
-        return self._validate_session(self.session_token)
+        return self._validate_session()
 
-    def _validate_session(self, session_token):
+    def _validate_session(self):
         resp = requests.post(f'{self.API_url}/sessions/validate', headers=self.get_request_headers())
         if resp.status_code != 201:
             self.logged_in = False
