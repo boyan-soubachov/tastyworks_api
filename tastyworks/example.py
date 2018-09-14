@@ -1,6 +1,8 @@
 import asyncio
+import calendar
 import logging
-from datetime import date
+from datetime import date, timedelta
+from decimal import Decimal
 
 from tastyworks.models import option_chain, underlying
 from tastyworks.models.option import Option, OptionType
@@ -37,15 +39,15 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
 
     details = OrderDetails(
         type=OrderType.LIMIT,
-        price=400,
+        price=Decimal(400),
         price_effect=OrderPriceEffect.CREDIT)
     new_order = Order(details)
 
     opt = Option(
         ticker='AKS',
         quantity=1,
-        expiry=date(2018, 10, 19),
-        strike=3.0,
+        expiry=get_third_friday(date.today()),
+        strike=Decimal(3),
         option_type=OptionType.CALL,
         underlying_type=UnderlyingType.EQUITY
     )
@@ -66,6 +68,11 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
         LOGGER.info('Received item: %s' % item.data)
 
 
+def get_third_friday(d):
+    s = date(d.year, d.month, 15)
+    return s + timedelta(days=(calendar.FRIDAY - s.weekday()) % 7)
+
+
 def main():
     tasty_client = tasty_session.create_new_session('your_username', 'your_password_here')
 
@@ -75,7 +82,7 @@ def main():
 
     try:
         loop.run_until_complete(main_loop(tasty_client, streamer))
-    except Exception as e:
+    except Exception:
         LOGGER.exception('Exception in main loop')
     finally:
         # find all futures/tasks still running and wait for them to finish

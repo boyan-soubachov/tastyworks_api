@@ -40,7 +40,9 @@ class WatchlistGroup(object):
             wlist.name = entry['name']
             wlist.slug = entry['slug']
             self.watchlists[wlist.slug] = wlist
+            
+        return self
 
 
 def get_all_watchlists():
-    return WatchlistGroup.load_watchlists()
+    return WatchlistGroup().load_watchlists()

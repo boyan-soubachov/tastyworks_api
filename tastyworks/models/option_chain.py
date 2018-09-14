@@ -1,7 +1,7 @@
 import logging
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Dict, List
+from typing import Dict
 
 import aiohttp
 
@@ -49,7 +49,7 @@ class OptionChain(object):
         return self._get_filter_strategy('expiry')
 
 
-async def get_option_chain(session, underlying: Underlying, expiration: date = None) -> List[Option]:
+async def get_option_chain(session, underlying: Underlying, expiration: date = None) -> OptionChain:
     LOGGER.debug('Getting options chain for ticker: %s', underlying.ticker)
     data = await _get_tasty_option_chain_data(session, underlying)
     res = []
@@ -74,7 +74,7 @@ async def get_option_chain(session, underlying: Underlying, expiration: date = N
     return OptionChain(res)
 
 
-async def _get_tasty_option_chain_data(session, underlying) -> List[Dict]:
+async def _get_tasty_option_chain_data(session, underlying) -> Dict:
     async with aiohttp.request(
             'GET',
             f'{session.API_url}/option-chains/{underlying.ticker}/nested',

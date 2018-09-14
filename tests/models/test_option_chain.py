@@ -1,5 +1,6 @@
 import unittest
 from datetime import date
+from decimal import Decimal
 
 from tastyworks.models import option, option_chain, underlying
 
@@ -9,17 +10,16 @@ class TestOptionChain(unittest.TestCase):
         options = [option.Option(
             ticker='AKS',
             expiry=date(2018, 1, 21),
-            strike=3.5,
+            strike=Decimal('3.5'),
+            option_type=option.OptionType.PUT,
+            underlying_type=underlying.UnderlyingType.EQUITY
+        ), option.Option(
+            ticker='AKS',
+            expiry=date(2018, 2, 21),
+            strike=Decimal(4),
             option_type=option.OptionType.PUT,
             underlying_type=underlying.UnderlyingType.EQUITY
         )]
-        options.append(option.Option(
-            ticker='AKS',
-            expiry=date(2018, 2, 21),
-            strike=4,
-            option_type=option.OptionType.PUT,
-            underlying_type=underlying.UnderlyingType.EQUITY
-        ))
 
         self.option_chain = option_chain.OptionChain(options)
 
@@ -35,7 +35,7 @@ class TestOptionChain(unittest.TestCase):
         self.option_chain.options.append(option.Option(
             ticker='AKS',
             expiry=date(2018, 4, 21),
-            strike=3.5,
+            strike=Decimal('3.5'),
             option_type=option.OptionType.PUT,
             underlying_type=underlying.UnderlyingType.EQUITY
         ))
@@ -52,7 +52,7 @@ class TestOptionChain(unittest.TestCase):
         self.option_chain.options.append(option.Option(
             ticker='AKS',
             expiry=date(2018, 2, 21),
-            strike=3.5,
+            strike=Decimal('3.5'),
             option_type=option.OptionType.PUT,
             underlying_type=underlying.UnderlyingType.EQUITY
         ))
