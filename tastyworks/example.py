@@ -70,7 +70,15 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
 
 def get_third_friday(d):
     s = date(d.year, d.month, 15)
-    return s + timedelta(days=(calendar.FRIDAY - s.weekday()) % 7)
+    candidate = s + timedelta(days=(calendar.FRIDAY - s.weekday()) % 7)
+
+    # This month's third friday passed
+    if candidate < d:
+        candidate += timedelta(weeks=4)
+        if candidate.day < 15:
+            candidate += timedelta(weeks=1)
+
+    return candidate
 
 
 def main():
