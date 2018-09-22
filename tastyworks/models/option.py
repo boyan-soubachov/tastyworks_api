@@ -4,6 +4,7 @@ from enum import Enum
 
 from dataclasses import dataclass
 
+from tastyworks.models.security import Security
 from tastyworks.models.underlying import UnderlyingType
 
 
@@ -13,7 +14,7 @@ class OptionType(Enum):
 
 
 @dataclass
-class Option(object):
+class Option(Security):
     ticker: str
     expiry: date
     strike: Decimal
@@ -40,14 +41,14 @@ class Option(object):
         return res
 
     def get_dxfeed_symbol(self):
-        if self.strike.is_integer():
-            strike_str = '{0:.0f}'.format(int(self.strike))
+        if self.strike % 1 == 0:
+            strike_str = '{0:.0f}'.format(self.strike)
         else:
             strike_str = '{0:.2f}'.format(self.strike)
             if strike_str[-1] == '0':
                 strike_str = strike_str[:-1]
 
-        res = '{ticker}{exp_date}{type}{strike}'.format(
+        res = '.{ticker}{exp_date}{type}{strike}'.format(
             ticker=self.ticker,
             exp_date=self.expiry.strftime('%y%m%d'),
             type=self.option_type.value,

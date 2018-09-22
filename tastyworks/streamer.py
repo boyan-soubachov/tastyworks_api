@@ -3,6 +3,7 @@ import datetime
 import json
 import logging
 import threading
+from typing import List
 
 import requests
 import websockets
@@ -94,7 +95,7 @@ class DataStreamer(object):
             }
         }])
 
-    def _get_connect_msg(self, advice=True) -> str:
+    def _get_connect_msg(self, advice=True) -> List:
         if advice:
             msg = [
                 {
