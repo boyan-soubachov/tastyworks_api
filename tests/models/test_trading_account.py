@@ -1,5 +1,6 @@
 import datetime
 import unittest
+from decimal import Decimal
 
 from tastyworks.models import option, order, underlying, trading_account
 
@@ -8,14 +9,14 @@ class TestTradingAccount(unittest.TestCase):
     def setUp(self):
         self.order_details = order.OrderDetails(
             type=order.OrderType.LIMIT,
-            price=400,
+            price=Decimal(400),
             price_effect=order.OrderPriceEffect.CREDIT,
         )
         self.order_details.legs = [
             option.Option(
                 ticker='AKS',
                 expiry=datetime.date(2018, 8, 31),
-                strike=3.5,
+                strike=Decimal('3.5'),
                 option_type=option.OptionType.CALL,
                 underlying_type=underlying.UnderlyingType.EQUITY,
                 quantity=1
