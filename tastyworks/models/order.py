@@ -27,6 +27,7 @@ class OrderStatus(Enum):
     FILLED = 'Filled'
     EXPIRED = 'Expired'
     LIVE = 'Live'
+    REJECTED = 'Rejected'
 
     def is_active(self):
         return self in (OrderStatus.LIVE, OrderStatus.RECEIVED)
