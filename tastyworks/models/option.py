@@ -2,7 +2,7 @@ from datetime import date
 from decimal import Decimal
 from enum import Enum
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from tastyworks.models.security import Security
 from tastyworks.models.underlying import UnderlyingType
@@ -12,6 +12,21 @@ class OptionType(Enum):
     PUT = 'P'
     CALL = 'C'
 
+
+@dataclass
+class CompleteOption(Security):
+    instrument_type: str
+    symbol_complete: str
+    quantity: int = 1
+    #action: str = field(init=False, repr=False)
+
+    def to_tasty_json(self):
+        res = {
+            'instrument-type': self.instrument_type,
+            'symbol': self.symbol_complete,
+            'quantity': self.quantity
+        }
+        return res
 
 @dataclass
 class Option(Security):

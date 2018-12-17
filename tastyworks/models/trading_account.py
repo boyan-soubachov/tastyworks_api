@@ -105,7 +105,8 @@ def _get_execute_order_json(order: Order):
 def _get_legs_request_data(order):
         res = []
         order_effect = order.details.price_effect
-        order_effect_str = 'Sell to Open' if order_effect == OrderPriceEffect.CREDIT else 'Buy to Open'
+        is_open_order = order.details.is_open_order
+        order_effect_str = f'{"Sell" if order_effect == OrderPriceEffect.CREDIT else "Buy"} to {"Open" if is_open_order else "Close"}'
         for leg in order.details.legs:
             leg_dict = {**leg.to_tasty_json(), 'action': order_effect_str}
             res.append(leg_dict)

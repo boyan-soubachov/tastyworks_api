@@ -15,10 +15,17 @@ class OrderType(Enum):
     LIMIT = 'Limit'
     MARKET = 'Market'
 
+    @classmethod
+    def from_str(cls, str_rep):
+        return getattr(cls, str_rep.upper(), None)
 
 class OrderPriceEffect(Enum):
     CREDIT = 'Credit'
     DEBIT = 'Debit'
+
+    @classmethod
+    def from_str(cls, str_rep):
+        return getattr(cls, str_rep.upper(), None)
 
 
 class OrderStatus(Enum):
@@ -28,6 +35,11 @@ class OrderStatus(Enum):
     EXPIRED = 'Expired'
     LIVE = 'Live'
     REJECTED = 'Rejected'
+    ROUTED = 'Routed'
+
+    @classmethod
+    def from_str(cls, str_rep):
+        return getattr(cls, str_rep.upper(), None)
 
     def is_active(self):
         return self in (OrderStatus.LIVE, OrderStatus.RECEIVED)
@@ -36,6 +48,7 @@ class OrderStatus(Enum):
 @dataclass
 class OrderDetails(object):
     type: OrderType = None
+    is_open_order: bool = field(default=True)
     time_in_force: str = 'Day'
     price: Decimal = None
     price_effect: OrderPriceEffect = None
