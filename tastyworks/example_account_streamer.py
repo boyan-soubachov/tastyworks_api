@@ -21,7 +21,7 @@ from tastyworks.tastyworks_api import tasty_session
 
 LOGGER = logging.getLogger(__name__)
 
-ENABLE_AUTOCLOSE = True
+ENABLE_AUTOCLOSE = False
 #Limit Example
 # AUTOCLOSE_ORDER_TYPE = OrderType.LIMIT
 # CLOSE_LIMIT_DELTA = 0.10
