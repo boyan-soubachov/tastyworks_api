@@ -44,6 +44,8 @@ class OrderStatus(Enum):
     def is_active(self):
         return self in (OrderStatus.LIVE, OrderStatus.RECEIVED)
 
+    def is_filled(self):
+        return self == OrderStatus.FILLED
 
 @dataclass
 class OrderDetails(object):
