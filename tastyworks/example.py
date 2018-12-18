@@ -25,7 +25,9 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
     #     ]
     # }
     sub_values = {
-        "Quote": ["/ES"]
+        "Trade": ["/ES"],
+        "Quote": ["/ES"],
+        "Summary": ["/ES","/NQ","VIX"],
     }
 
     accounts = await TradingAccount.get_remote_accounts(session)
@@ -36,7 +38,6 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
     LOGGER.info('Number of active orders: %s', len(orders))
 
     # Execute an order
-
     details = OrderDetails(
         type=OrderType.LIMIT,
         price=Decimal(400),
