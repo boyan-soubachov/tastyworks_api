@@ -65,7 +65,7 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
     await streamer.add_data_sub(sub_values)
 
     async for item in streamer.listen():
-        LOGGER.info('Received item: %s' % item.data)
+        LOGGER.info('Received item {%s}: %s' % (item.DXFEED_TEXT.upper(), item.data))
 
 
 def get_third_friday(d):
