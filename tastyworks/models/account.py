@@ -41,9 +41,6 @@ class OrderChangeAccountObject(ChangeAccountObject):
     order_type: OrderType
     size: int
     underlying_symbol: str
-    price: float
-    price_effect: str
-    price_effect_enum: OrderPriceEffect = field(init=False, repr=False)    
     status: str
     status_enum: OrderStatus = field(init=False, repr=False)  
     cancellable: bool = field(repr=False)    
@@ -54,17 +51,25 @@ class OrderChangeAccountObject(ChangeAccountObject):
     updated_at_formatted: str = field(init=False, repr=False)
     legs: List[LegAccountObject]
 
+    price: float = field(default=None)
+    price_effect: str = field(default=None)         #Doesn't come on a Stop Market order
+    price_effect_enum: OrderPriceEffect = field(init=False, repr=False)
     cancelled_at: str = field(repr=False, default=None)
     terminal_at: str = field(repr=False, default=None)
+    stop_trigger: float = field(repr=False, default=None)
     reject_reason: str = field(repr=False, default=None)
     ext_exchange_order_number: str = field(repr=False, default=None)
     ext_client_order_id: str = field(repr=False, default=None)
     ext_global_order_number: float = field(repr=False, default=None)
      
     def __post_init__(self):
-        self.price = float(self.price)
-        self.price_effect_enum = OrderPriceEffect.from_str(self.price_effect)
+        if self.price:
+            self.price = float(self.price)
+        if self.price_effect:
+            self.price_effect_enum = OrderPriceEffect.from_str(self.price_effect)
         self.status_enum = OrderStatus.from_str(self.status)
+        if self.stop_trigger:
+            self.stop_trigger = float(self.stop_trigger)
         self.updated_at_formatted = str(datetime.fromtimestamp(self.updated_at/1000))
         if self.legs:
            self.legs = [LegAccountObject(**from_tasty_dict(leg)) for leg in self.legs]

@@ -21,17 +21,35 @@ from tastyworks.tastyworks_api import tasty_session
 
 LOGGER = logging.getLogger(__name__)
 
-ENABLE_AUTOCLOSE_SCALP = False
-SCALP_GAIN = 0.10  #Default Price for Closing Order
+ENABLE_AUTOCLOSE = True
+#Limit Example
+# AUTOCLOSE_ORDER_TYPE = OrderType.LIMIT
+# CLOSE_LIMIT_DELTA = 0.10
+# STOP_TRIGGER_DELTA = None
+# #Market Example
+# AUTOCLOSE_ORDER_TYPE = OrderType.MARKET           NOT TESTED YET
+# CLOSE_LIMIT_DELTA = None
+# STOP_TRIGGER_DELTA = None
+# #Stop Limit Example
+# AUTOCLOSE_ORDER_TYPE = OrderType.STOP_LIMIT       NOT RECOMMENDED YET
+# CLOSE_LIMIT_DELTA = -0.25
+# STOP_TRIGGER_DELTA = -0.20
+# #Stop Market Example
+# AUTOCLOSE_ORDER_TYPE = OrderType.STOP_MARKET      NOT TESTED YET
+# CLOSE_LIMIT_DELTA = None
+# STOP_TRIGGER_DELTA = -0.20
 
-async def create_closing_order(session: TastyAPISession, acct: TradingAccount, order: OrderChangeAccountObject, price: float):
 
-        LOGGER.warning(f"Creating Closing Order for ${(order.price + SCALP_GAIN):.2f}")
+async def create_closing_order(session: TastyAPISession, acct: TradingAccount, order: OrderChangeAccountObject,
+    close_order_type: OrderType, limit_price_delta: float = None, stop_order_trigger: float = None):
+
+        LOGGER.warning(f"Creating Closing Order: {AUTOCLOSE_ORDER_TYPE.name}")
 
         flipped_ope = (OrderPriceEffect.CREDIT if OrderPriceEffect.DEBIT == order.price_effect_enum.DEBIT else OrderPriceEffect.DEBIT)
         details = OrderDetails(
-            type=OrderType.LIMIT,
-            price=order.price + price,
+            type=close_order_type,
+            price=((order.price + limit_price_delta) if close_order_type.is_limit() else None),
+            stop_trigger=(stop_order_trigger if close_order_type.is_stop() else None),
             price_effect=flipped_ope,
             is_open_order=False
         )
@@ -56,7 +74,7 @@ async def main_loop(session: TastyAPISession, streamer: AccountStreamer):
 
     # Will log out the accounts in use and then create a closing order automatically
     async for item in streamer.listen():
-        #LOGGER.debug('Received item: %s' % item)
+        #LOGGER.info('Received item: %s' % item)
 
         myclass = AccountEvent.from_dict(item)
         is_account_subscribe = type(myclass) is ActionAccountEvent and myclass.action_enum == ActionAccountEventType.ACCOUNT_SUBSCRIBE
@@ -69,8 +87,9 @@ async def main_loop(session: TastyAPISession, streamer: AccountStreamer):
                 order = myclass.data_obj
                 LOGGER.info(order)
 
-                if ENABLE_AUTOCLOSE_SCALP and order.status_enum.is_filled(): #or order.status_enum.is_active():
-                    await create_closing_order(session, accounts[0], myclass.data_obj, SCALP_GAIN)
+                if ENABLE_AUTOCLOSE and order.status_enum.is_filled(): #or order.status_enum.is_active():
+                    await create_closing_order(session, accounts[0], myclass.data_obj, 
+                                               AUTOCLOSE_ORDER_TYPE, CLOSE_LIMIT_DELTA, STOP_TRIGGER_DELTA)
 
 def main():
     from tastyworks.__auth import USERNAME, PASSWORD

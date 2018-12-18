@@ -14,10 +14,19 @@ LOGGER = logging.getLogger(__name__)
 class OrderType(Enum):
     LIMIT = 'Limit'
     MARKET = 'Market'
+    STOP_LIMIT = 'Stop Limit'
+    STOP_MARKET = 'Stop'
+
+    def is_limit(self):
+        return self in (OrderType.LIMIT, OrderType.STOP_LIMIT)
+    def is_stop(self):
+        return self in (OrderType.STOP_LIMIT, OrderType.STOP_MARKET)
+    def is_market(self):
+        return self in (OrderType.MARKET, OrderType.STOP_MARKET)
 
     @classmethod
     def from_str(cls, str_rep):
-        return getattr(cls, str_rep.upper(), None)
+        return getattr(cls, str_rep.replace('_', ' ', 1).upper(), None)
 
 class OrderPriceEffect(Enum):
     CREDIT = 'Credit'
@@ -53,6 +62,7 @@ class OrderDetails(object):
     is_open_order: bool = field(default=True)
     time_in_force: str = 'Day'
     price: Decimal = None
+    stop_trigger: Decimal = None
     price_effect: OrderPriceEffect = None
     status: OrderStatus = None
     legs: List[Security] = field(default_factory=list)
