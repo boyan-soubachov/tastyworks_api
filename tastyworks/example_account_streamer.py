@@ -21,7 +21,7 @@ from tastyworks.tastyworks_api import tasty_session
 
 LOGGER = logging.getLogger(__name__)
 
-SCALP_GAIN = 0.05  #Default Price for Closing Order
+SCALP_GAIN = 0.10  #Default Price for Closing Order
 
 async def create_closing_order(session: TastyAPISession, acct: TradingAccount, order: OrderChangeAccountObject, price: float):
 
@@ -44,7 +44,7 @@ async def create_closing_order(session: TastyAPISession, acct: TradingAccount, o
             )
             new_order.add_leg(opt)
 
-        res = await acct.execute_order(new_order, session)
+        res = await acct.execute_order(new_order, session, dry_run=False)
         LOGGER.info(f"Closing Order opened?: {bool(res)}")
         
 async def main_loop(session: TastyAPISession, streamer: AccountStreamer):
