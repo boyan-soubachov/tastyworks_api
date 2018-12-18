@@ -21,6 +21,7 @@ from tastyworks.tastyworks_api import tasty_session
 
 LOGGER = logging.getLogger(__name__)
 
+ENABLE_AUTOCLOSE_SCALP = False
 SCALP_GAIN = 0.10  #Default Price for Closing Order
 
 async def create_closing_order(session: TastyAPISession, acct: TradingAccount, order: OrderChangeAccountObject, price: float):
@@ -68,7 +69,7 @@ async def main_loop(session: TastyAPISession, streamer: AccountStreamer):
                 order = myclass.data_obj
                 LOGGER.info(order)
 
-                if order.status_enum.is_filled(): #or order.status_enum.is_active():
+                if ENABLE_AUTOCLOSE_SCALP and order.status_enum.is_filled(): #or order.status_enum.is_active():
                     await create_closing_order(session, accounts[0], myclass.data_obj, SCALP_GAIN)
 
 def main():
