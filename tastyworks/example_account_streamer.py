@@ -21,11 +21,11 @@ from tastyworks.tastyworks_api import tasty_session
 
 LOGGER = logging.getLogger(__name__)
 
-ENABLE_AUTOCLOSE = False
+ENABLE_AUTOCLOSE = True
 #Limit Example
-# AUTOCLOSE_ORDER_TYPE = OrderType.LIMIT
-# CLOSE_LIMIT_DELTA = 0.10
-# STOP_TRIGGER_DELTA = None
+AUTOCLOSE_ORDER_TYPE = OrderType.LIMIT
+CLOSE_LIMIT_DELTA = 0.10
+STOP_TRIGGER_DELTA = None
 # #Market Example
 # AUTOCLOSE_ORDER_TYPE = OrderType.MARKET           NOT TESTED YET
 # CLOSE_LIMIT_DELTA = None
@@ -45,7 +45,10 @@ async def create_closing_order(session: TastyAPISession, acct: TradingAccount, o
 
         LOGGER.warning(f"Creating Closing Order: {AUTOCLOSE_ORDER_TYPE.name}")
 
-        flipped_ope = (OrderPriceEffect.CREDIT if OrderPriceEffect.DEBIT == order.price_effect_enum.DEBIT else OrderPriceEffect.DEBIT)
+        #Market Orders don't have price effect, assumes we're Buying first
+        flipped_ope = (OrderPriceEffect.CREDIT if (getattr(order, 'price_effect_enum') and OrderPriceEffect.DEBIT == order.price_effect_enum.DEBIT)
+                      else OrderPriceEffect.DEBIT)
+
         details = OrderDetails(
             type=close_order_type,
             price=((order.price + limit_price_delta) if close_order_type.is_limit() else None),
