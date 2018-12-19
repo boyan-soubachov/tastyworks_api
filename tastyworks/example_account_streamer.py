@@ -46,7 +46,7 @@ async def create_closing_order(session: TastyAPISession, acct: TradingAccount, o
         LOGGER.warning(f"Creating Closing Order: {AUTOCLOSE_ORDER_TYPE.name}")
 
         #Market Orders don't have price effect, assumes we're Buying first
-        flipped_ope = (OrderPriceEffect.CREDIT if (getattr(order, 'price_effect_enum') and OrderPriceEffect.DEBIT == order.price_effect_enum.DEBIT)
+        flipped_ope = (OrderPriceEffect.CREDIT if (not(getattr(order, 'price_effect_enum')) or OrderPriceEffect.DEBIT == order.price_effect_enum.DEBIT)
                       else OrderPriceEffect.DEBIT)
 
         details = OrderDetails(
