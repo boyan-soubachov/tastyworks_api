@@ -24,7 +24,7 @@ LOGGER = logging.getLogger(__name__)
 ENABLE_AUTOCLOSE = True
 #Limit Example
 AUTOCLOSE_ORDER_TYPE = OrderType.LIMIT
-CLOSE_LIMIT_DELTA = 0.10
+CLOSE_LIMIT_DELTA = 0.05
 STOP_TRIGGER_DELTA = None
 # #Market Example
 # AUTOCLOSE_ORDER_TYPE = OrderType.MARKET           NOT TESTED YET
@@ -46,7 +46,7 @@ async def create_closing_order(session: TastyAPISession, acct: TradingAccount, o
         LOGGER.warning(f"Creating Closing Order: {AUTOCLOSE_ORDER_TYPE.name}")
 
         #Market Orders don't have price effect, assumes we're Buying first
-        flipped_ope = (OrderPriceEffect.CREDIT if (not(getattr(order, 'price_effect_enum')) or OrderPriceEffect.DEBIT == order.price_effect_enum.DEBIT)
+        flipped_ope = (OrderPriceEffect.CREDIT if (not(getattr(order, 'price_effect_enum', None)) or OrderPriceEffect.DEBIT == order.price_effect_enum.DEBIT)
                       else OrderPriceEffect.DEBIT)
 
         details = OrderDetails(
@@ -90,7 +90,7 @@ async def main_loop(session: TastyAPISession, streamer: AccountStreamer):
                 order = myclass.data_obj
                 LOGGER.info(order)
 
-                if ENABLE_AUTOCLOSE and order.status_enum.is_filled(): #or order.status_enum.is_active():
+                if ENABLE_AUTOCLOSE and order.is_open_order() and order.status_enum.is_filled(): #or order.status_enum.is_active():
                     await create_closing_order(session, accounts[0], myclass.data_obj, 
                                                AUTOCLOSE_ORDER_TYPE, CLOSE_LIMIT_DELTA, STOP_TRIGGER_DELTA)
 

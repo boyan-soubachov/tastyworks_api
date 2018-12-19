@@ -73,3 +73,12 @@ class OrderChangeAccountObject(ChangeAccountObject):
         self.updated_at_formatted = str(datetime.fromtimestamp(self.updated_at/1000))
         if self.legs:
            self.legs = [LegAccountObject(**from_tasty_dict(leg)) for leg in self.legs]
+
+    def is_open_order(self):
+
+        is_open = False
+        for leg in self.legs:
+            if "Buy" in leg.action:
+                is_open = True
+                break
+        return is_open
