@@ -4,6 +4,16 @@ All important and notable changes will be documented here.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.1.1] - 2019-01-16
+
+### Added
+- The `rejected` order status type
+
+### Changed
+- Fixed bug with in the `Quote` mapped item to support the new time fields
+- Removed the `time` key from the `Quote` mapped item
+- Fix bug for missing `price` field in the `Order` model
+
 ## [3.0.1] - 2018-09-11
 
 ### Changed

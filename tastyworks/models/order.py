@@ -11,6 +11,7 @@ from tastyworks.models.security import Security
 LOGGER = logging.getLogger(__name__)
 
 
+
 class OrderType(Enum):
     LIMIT = 'Limit'
     MARKET = 'Market'
@@ -83,14 +84,12 @@ class Order(Security):
         Parses an Order object from a dict.
         """
         details = OrderDetails(input_dict['underlying-symbol'])
-        details.price = Decimal(input_dict['price'])
+        details.price = Decimal(input_dict['price']) if 'price' in input_dict else None
         details.price_effect = OrderPriceEffect(input_dict['price-effect'])
         details.type = OrderType(input_dict['order-type'])
         details.status = OrderStatus(input_dict['status'])
         details.time_in_force = input_dict['time-in-force']
-        return cls(
-            order_details=details
-        )
+        return cls(order_details=details)
 
     @classmethod
     async def get_remote_orders(cls, session, account, **kwargs) -> List:
