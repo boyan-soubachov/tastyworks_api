@@ -11,7 +11,6 @@ from tastyworks.models.security import Security
 LOGGER = logging.getLogger(__name__)
 
 
-
 class OrderType(Enum):
     LIMIT = 'Limit'
     MARKET = 'Market'

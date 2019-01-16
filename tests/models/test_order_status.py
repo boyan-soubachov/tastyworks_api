@@ -18,4 +18,4 @@ class TestOrderStatus(unittest.TestCase):
         self.assertFalse(new_status.is_active())
 
         new_status = OrderStatus.EXPIRED
-        self.assertFalse(new_status.is_active())    
+        self.assertFalse(new_status.is_active())
