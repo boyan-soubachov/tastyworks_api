@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 from typing import List
@@ -33,10 +34,17 @@ class OrderStatus(Enum):
         return self in (OrderStatus.LIVE, OrderStatus.RECEIVED)
 
 
+class TimeInForce(Enum):
+    DAY = 'Day'
+    GTC = 'GTC'
+    GTD = 'GTD'
+
+
 @dataclass
 class OrderDetails(object):
     type: OrderType = None
-    time_in_force: str = 'Day'
+    time_in_force: TimeInForce = TimeInForce.DAY
+    gtc_date: str = None
     price: Decimal = None
     price_effect: OrderPriceEffect = None
     status: OrderStatus = None
@@ -57,6 +65,12 @@ class OrderDetails(object):
 
         if not self.legs:
             return False
+
+        if self.time_in_force == TimeInForce.GTD:
+            try:
+                datetime.strptime(self.gtc_date, '%Y-%m-%d')
+            except ValueError:
+                return False
 
         return True
 
@@ -88,6 +102,7 @@ class Order(Security):
         details.type = OrderType(input_dict['order-type'])
         details.status = OrderStatus(input_dict['status'])
         details.time_in_force = input_dict['time-in-force']
+        details.gtc_date = input_dict.get('gtc-date', None)
         return cls(order_details=details)
 
     @classmethod

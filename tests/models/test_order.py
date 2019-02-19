@@ -1,6 +1,8 @@
 import unittest
 from tastyworks.models import order
 
+DATE = '2019-02-12'
+
 
 class TestOrderStatus(unittest.TestCase):
     def setUp(self):
@@ -18,3 +20,11 @@ class TestOrderStatus(unittest.TestCase):
         res = order.Order.from_dict(self.json_input)
         self.assertEqual(res.details.type, order.OrderType.MARKET)
         self.assertIsNone(res.details.price)
+
+    def test_from_dict_when_gtd(self):
+        self.json_input['time-in-force'] = 'GTD'
+        self.json_input['gtc-date'] = DATE
+        res = order.Order.from_dict(self.json_input)
+        self.assertEqual(res.details.type, order.OrderType.MARKET)
+        self.assertEqual(res.details.time_in_force, order.TimeInForce.GTD.value)
+        self.assertEqual(res.details.gtc_date, DATE)
