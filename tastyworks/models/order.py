@@ -44,7 +44,7 @@ class TimeInForce(Enum):
 class OrderDetails(object):
     type: OrderType = None
     time_in_force: TimeInForce = TimeInForce.DAY
-    gtc_date: str = None
+    gtc_date: datetime = None
     price: Decimal = None
     price_effect: OrderPriceEffect = None
     status: OrderStatus = None

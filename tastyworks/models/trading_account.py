@@ -102,7 +102,7 @@ def _get_execute_order_json(order: Order):
     }
 
     if order.details.gtc_date:
-        order_json['gtc-date'] = order.details.gtc_date
+        order_json['gtc-date'] = order.details.gtc_date.strftime('%Y-%m-%d')
 
     return order_json
 

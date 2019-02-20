@@ -13,7 +13,7 @@ def build_default_order(time_in_force=order.TimeInForce.DAY):
         price=Decimal(400),
         price_effect=order.OrderPriceEffect.CREDIT,
         time_in_force=time_in_force,
-        gtc_date=GTC_DATE if time_in_force == order.TimeInForce.GTD else None
+        gtc_date=datetime.datetime(2019, 2, 12) if time_in_force == order.TimeInForce.GTD else None
     )
     order_details.legs = [
         option.Option(

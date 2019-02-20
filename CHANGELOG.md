@@ -4,6 +4,14 @@ All important and notable changes will be documented here.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.1.2] - 2019-02-19
+
+### Added
+- The `time-in-force` and `gtc-date` properties to the OrderDetails object
+
+### Changed
+- Example script now uses env vars for TastyWorks username/password instead of hard-coding values.
+
 ## [3.1.1] - 2019-01-16
 
 ### Added
