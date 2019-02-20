@@ -1,6 +1,7 @@
 import asyncio
 import calendar
 import logging
+from os import environ
 from datetime import date, timedelta
 from decimal import Decimal
 
@@ -82,7 +83,7 @@ def get_third_friday(d):
 
 
 def main():
-    tasty_client = tasty_session.create_new_session('your_username', 'your_password_here')
+    tasty_client = tasty_session.create_new_session(environ['TW_USER'], environ['TW_PASSWORD'])
 
     streamer = DataStreamer(tasty_client)
     LOGGER.info('Streamer token: %s' % streamer.get_streamer_token())

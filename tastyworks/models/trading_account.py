@@ -92,21 +92,26 @@ class TradingAccount(object):
 
 
 def _get_execute_order_json(order: Order):
-    return {
+    order_json = {
         'source': order.details.source,
         'order-type': order.details.type.value,
         'price': '{:.2f}'.format(order.details.price),
         'price-effect': order.details.price_effect.value,
-        'time-in-force': order.details.time_in_force,
+        'time-in-force': order.details.time_in_force.value,
         'legs': _get_legs_request_data(order)
     }
 
+    if order.details.gtc_date:
+        order_json['gtc-date'] = order.details.gtc_date.strftime('%Y-%m-%d')
+
+    return order_json
+
 
 def _get_legs_request_data(order):
-        res = []
-        order_effect = order.details.price_effect
-        order_effect_str = 'Sell to Open' if order_effect == OrderPriceEffect.CREDIT else 'Buy to Open'
-        for leg in order.details.legs:
-            leg_dict = {**leg.to_tasty_json(), 'action': order_effect_str}
-            res.append(leg_dict)
-        return res
+    res = []
+    order_effect = order.details.price_effect
+    order_effect_str = 'Sell to Open' if order_effect == OrderPriceEffect.CREDIT else 'Buy to Open'
+    for leg in order.details.legs:
+        leg_dict = {**leg.to_tasty_json(), 'action': order_effect_str}
+        res.append(leg_dict)
+    return res
