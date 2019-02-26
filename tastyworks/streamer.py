@@ -1,19 +1,17 @@
 import asyncio
 import datetime
-import json
 import logging
 
 import aiocometd
 import requests
+from aiocometd import ConnectionType
 
+from tastyworks import dxfeed
 from tastyworks.dxfeed import mapper as dxfeed_mapper
 from tastyworks.models.session import TastyAPISession
 
 LOGGER = logging.getLogger(__name__)
 
-
-# TODO:
-# * Proper exception handling and bubbling
 
 class DataStreamer(object):
     def __init__(self, session: TastyAPISession):
@@ -36,27 +34,25 @@ class DataStreamer(object):
 
     async def add_data_sub(self, values):
         LOGGER.debug(f'Adding subscription: {values}')
-        await self._send_msg('/service/sub', {'add': values})
+        await self._send_msg(dxfeed.SUBSCRIPTION_CHANNEL, {'add': values})
 
     async def remove_data_sub(self, values):
         # NOTE: Experimental, unconfirmed. Needs testing
         LOGGER.info(f'Removing subscription: {values}')
-        await self._send_msg('/service/sub', {'remove': values})
+        await self._send_msg(dxfeed.SUBSCRIPTION_CHANNEL, {'remove': values})
 
     async def _consumer(self, message):
-        msg_object = json.loads(message)
-        LOGGER.debug('Object conversion: %s', msg_object)
-        return dxfeed_mapper.map_message(msg_object)
+        return dxfeed_mapper.map_message(message)
 
     async def _send_msg(self, channel, message):
         if not self.logged_in:
             raise Exception('Connection not made or logged in')
-        LOGGER.debug('[dxFeed] sending: %s', message)
+        LOGGER.debug('[dxFeed] sending: %s on channel: %s', message, channel)
         await self.cometd_client.publish(channel, message)
 
     async def reset_data_subs(self):
-        LOGGER.info('Resetting data subscriptions')
-        await self._send_msg('/service/sub', {'reset': True})
+        LOGGER.debug('Resetting data subscriptions')
+        await self._send_msg(dxfeed.SUBSCRIPTION_CHANNEL, {'reset': True})
 
     def get_streamer_token(self):
         return self._get_streamer_data()['data']['token']
@@ -79,11 +75,11 @@ class DataStreamer(object):
 
     def _get_streamer_websocket_url(self):
         socket_url = self._get_streamer_data()['data']['websocket-url']
-        socket_url = socket_url.replace('https://', '')
-        full_url = 'wss://{}/cometd'.format(socket_url)
+        full_url = '{}/cometd'.format(socket_url)
         return full_url
 
     async def _setup_connection(self):
+        aiocometd.client.DEFAULT_CONNECTION_TYPE = ConnectionType.WEBSOCKET
         streamer_url = self._get_streamer_websocket_url()
         LOGGER.info('Connecting to url: %s', streamer_url)
 
@@ -91,25 +87,22 @@ class DataStreamer(object):
         cometd_client = aiocometd.Client(
             streamer_url,
             auth=auth_extension,
-            connection_types=aiocometd.ConnectionType.WEBSOCKET
         )
         await cometd_client.open()
+        await cometd_client.subscribe(dxfeed.DATA_CHANNEL)
 
         self.cometd_client = cometd_client
         self.logged_in = True
         LOGGER.info('Connected and logged in to dxFeed data stream')
 
-        # await self.reset_data_subs()
-
-        LOGGER.info('Connection setup completed!')
+        await self.reset_data_subs()
 
     async def listen(self):
         async for msg in self.cometd_client:
             LOGGER.debug('[dxFeed] received: %s', msg)
-            res = await self._consumer(msg)
-            if not res:
+            if msg['channel'] != dxfeed.DATA_CHANNEL:
                 continue
-            yield res
+            yield await self._consumer(msg['data'])
 
 
 class AuthExtension(aiocometd.AuthExtension):
