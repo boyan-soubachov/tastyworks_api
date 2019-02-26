@@ -2,10 +2,10 @@ from setuptools import setup, find_packages
 
 
 REQUIRES = [
-    'aiohttp==3.2.1',
+    'aiocometd',
+    'aiohttp<4',
     'dataclasses',
-    'requests==2.18.4',
-    'websockets==6.0',
+    'requests<3',
 ]
 
 TEST_REQUIRES = [
@@ -20,7 +20,7 @@ setup(
     author='Boyan Soubachov',
     author_email='boyanvs@gmail.com',
     url='http://pypi.python.org/pypi/tastyworks/',
-    version='3.1.2',
+    version='4',
     packages=find_packages(exclude=['main.py']),
     python_requires='>= 3.6.0',
     description='Tastyworks (unofficial) API',
