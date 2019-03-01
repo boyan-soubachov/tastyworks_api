@@ -83,7 +83,7 @@ def get_third_friday(d):
 
 
 def main():
-    tasty_client = tasty_session.create_new_session(environ['TW_USER'], environ['TW_PASSWORD'])
+    tasty_client = tasty_session.create_new_session(environ.get('TW_USER', ""), environ.get('TW_PASSWORD', ""))
 
     streamer = DataStreamer(tasty_client)
     LOGGER.info('Streamer token: %s' % streamer.get_streamer_token())
