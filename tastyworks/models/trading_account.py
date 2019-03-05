@@ -89,7 +89,26 @@ class TradingAccount(object):
             res.append(acct)
 
         return res
-
+        
+    @classmethod
+    async def get_account_balance(cls, session, account):
+        """
+        Get balance.
+        
+        Args:
+            session (TastyAPISession): An active and logged-in session object against which to query.
+            account (TradingAccount): The account_id to get orders on.
+        Returns:
+            dict: account attributes
+        """
+        
+        url = f'{session.API_url}/accounts/{account.account_number}/balances'
+        
+        async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
+            if response.status != 200:
+                raise Exception('Could not get trading account balance info from Tastyworks...')
+            data = (await response.json())['data']
+        return data
 
 def _get_execute_order_json(order: Order):
     order_json = {
