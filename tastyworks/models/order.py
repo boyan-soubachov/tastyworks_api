@@ -175,7 +175,7 @@ class Order(Security):
             if resp.status != 200:
                 raise Exception('Could not delete the order')
             data = (await resp.json())['data']
-            order = cls.from_dict(order_data)
+            order = cls.from_dict(data)
             if order.details.status.is_active():
                 return None
             else:
