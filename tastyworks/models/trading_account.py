@@ -3,7 +3,9 @@ from typing import List
 import aiohttp
 from dataclasses import dataclass
 
-from tastyworks.models.order import Order, OrderPriceEffect
+from tastyworks.models.order import Order, OrderPriceEffect, OrderType
+from tastyworks.models.alert import Alert
+from tastyworks.models.position import Position
 
 
 @dataclass
@@ -111,6 +113,81 @@ class TradingAccount(object):
             data = (await response.json())['data']
         return data
 
+    async def get_quote_alert(session):
+        """
+        Get quote alerts.
+
+        Args:
+            session (TastyAPISession): An active and logged-in session object against which to query.
+            account (TradingAccount): The account_id to get balance on.
+        Returns:
+            dict: quote alerts
+        """
+        url = '{}/quote-alerts'.format(session.API_url)
+
+        async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
+            if response.status != 200:
+                raise Exception('Could not get quote alerts from Tastyworks...')
+            data = Alert.from_dict((await response.json())['data']['items'])
+        return data
+
+    async def set_quote_alert(session, alert: Alert):
+        """
+        Create a quote alert.
+
+        Args:
+            alert (Alert): The Alert object to create.
+            session (TastyAPISession): The tastyworks session onto which to execute the order.
+
+        Returns:
+            bool: Whether the alert creation was successful.
+        """
+
+        if not session.is_active():
+            raise Exception('The supplied session is not active and valid')
+
+        url = '{}/quote-alerts'.format(session.API_url)
+
+        body = alert.get_json()
+
+        async with aiohttp.request('POST', url, headers=session.get_request_headers(), json=body) as resp:
+            if resp.status == 201:
+                return True
+            elif resp.status == 400:
+                raise Exception('Failed to create the alert, message: {}'.format(await resp.text()))
+            else:
+                raise Exception('Unknown remote error, status code: {}, message: {}'.format(resp.status, await resp.text()))
+
+    async def delete_quote_alert(session, alert: Alert):
+        """
+        Delete a quote alert.
+
+        Args:
+            alert (Alert): The Alert object to delete.  This must have the alert_external_id field set.
+            session (TastyAPISession): The tastyworks session onto which to execute the order.
+
+        Returns:
+            bool: Whether the alert creation was successful.
+        """
+
+        if not session.is_active():
+            raise Exception('The supplied session is not active and valid')
+
+        if alert.alert_external_id == '':
+            raise Exception('The supplied alert object does not have the alert_external_id value set.')
+
+        url = '{}/quote-alerts/{}'.format(session.API_url, alert.alert_external_id)
+
+        body = alert.get_json()
+
+        async with aiohttp.request('DELETE', url, headers=session.get_request_headers(), json=body) as resp:
+            if resp.status == 204:
+                return True
+            elif resp.status == 400:
+                raise Exception('Failed to delete the quote alert, message: {}'.format(await resp.text()))
+            else:
+                raise Exception('Unknown remote error, status code: {}, message: {}'.format(resp.status, await resp.text()))
+
     async def get_positions(session, account):
         """
         Get Open Positions.
@@ -129,7 +206,7 @@ class TradingAccount(object):
         async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
             if response.status != 200:
                 raise Exception('Could not get open positions info from Tastyworks...')
-            data = (await response.json())['data']['items']
+            data = Position.list_from_dict((await response.json())['data']['items'])
         return data
 
     async def get_live_orders(session, account):
@@ -179,11 +256,16 @@ def _get_execute_order_json(order: Order):
     order_json = {
         'source': order.details.source,
         'order-type': order.details.type.value,
-        'price': '{:.2f}'.format(order.details.price),
         'price-effect': order.details.price_effect.value,
         'time-in-force': order.details.time_in_force.value,
         'legs': _get_legs_request_data(order)
     }
+
+    if order.details.type == OrderType.STOP_LIMIT or order.details.type == OrderType.STOP:
+        order_json['stop-trigger'] = '{:.2f}'.format(order.details.stop_trigger)
+
+    if not order.details.type == OrderType.STOP:
+        order_json['price'] = '{:.2f}'.format(order.details.price)
 
     if order.details.gtc_date:
         order_json['gtc-date'] = order.details.gtc_date.strftime('%Y-%m-%d')

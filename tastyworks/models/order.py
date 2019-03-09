@@ -15,6 +15,8 @@ LOGGER = logging.getLogger(__name__)
 class OrderType(Enum):
     LIMIT = 'Limit'
     MARKET = 'Market'
+    STOP_LIMIT = 'Stop Limit'
+    STOP = 'Stop'
 
 
 class OrderPriceEffect(Enum):
@@ -42,10 +44,13 @@ class TimeInForce(Enum):
 
 @dataclass
 class OrderDetails(object):
+    order_id = None
+    ticker = None
     type: OrderType = None
     time_in_force: TimeInForce = TimeInForce.DAY
     gtc_date: datetime = None
     price: Decimal = None
+    stop_trigger: Decimal = None
     price_effect: OrderPriceEffect = None
     status: OrderStatus = None
     legs: List[Security] = field(default_factory=list)
@@ -54,13 +59,26 @@ class OrderDetails(object):
     def is_executable(self) -> bool:
         required_data = all([
             self.time_in_force,
-            self.price_effect,
-            self.price is not None,
             self.type,
             self.source
         ])
 
+        if self.type == OrderType.STOP:
+            non_stop_required_data = all([
+                self.price_effect,
+                self.price is None
+            ])
+        else:
+            non_stop_required_data = all([
+                self.price_effect,
+                self.price is not None
+            ])
+
+
         if not required_data:
+            return False
+
+        if not non_stop_required_data:
             return False
 
         if not self.legs:
@@ -97,8 +115,11 @@ class Order(Security):
         Parses an Order object from a dict.
         """
         details = OrderDetails(input_dict['underlying-symbol'])
+        details.order_id = input_dict['id'] if 'id' in input_dict else None
+        details.ticker = input_dict['underlying-symbol'] if 'underlying-symbol' in input_dict else None
         details.price = Decimal(input_dict['price']) if 'price' in input_dict else None
-        details.price_effect = OrderPriceEffect(input_dict['price-effect'])
+        details.stop_trigger = Decimal(input_dict['stop-trigger']) if 'stop-trigger' in input_dict else None
+        details.price_effect = OrderPriceEffect(input_dict['price-effect']) if 'price-effect' in input_dict else None
         details.type = OrderType(input_dict['order-type'])
         details.status = OrderStatus(input_dict['status'])
         details.time_in_force = input_dict['time-in-force']
@@ -143,3 +164,35 @@ class Order(Security):
                     continue
                 res.append(order)
         return res
+
+    @classmethod
+    async def cancel_order(cls, session, account, order_id):
+        """
+        cancels an order on Tastyworks.
+
+        Args:
+            session (TastyAPISession): The session to use.
+            account (TradingAccount): The account_id to get orders on.
+            order_id (OrderDetails): The order_id returned from get_remote_orders.
+
+        Returns:
+            A single order. The order will have a cancalled status if successfull.
+        """
+        if not session.logged_in:
+            raise Exception('Tastyworks session not logged in.')
+
+        url = '{}/accounts/{}/orders/{}'.format(
+            session.API_url,
+            account.account_number,
+            order_id
+        )
+
+        async with aiohttp.request('DELETE', url, headers=session.get_request_headers()) as resp:
+            if resp.status != 200:
+                raise Exception('Could not delete the order')
+            data = (await resp.json())['data']
+            order = cls.from_dict(data)
+            if order.details.status.is_active():
+                return None
+            else:
+                return order
