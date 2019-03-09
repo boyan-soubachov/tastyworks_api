@@ -149,7 +149,7 @@ class Order(Security):
         return res
 
     @classmethod
-    async def cancel_order(cls, session, account, order_id)
+    async def cancel_order(cls, session, account, order_id):
         """
         cancels an order on Tastyworks.
 
