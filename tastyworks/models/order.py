@@ -149,7 +149,7 @@ class Order(Security):
         return res
 
     @classmethod
-    async def cancel_order(cls, session, account, order_id)
+    async def cancel_order(cls, session, account, order_id) -> List
         """
         cancels an order on Tastyworks.
 
@@ -180,4 +180,5 @@ class Order(Security):
             if order.details.status.is_active():
                 return None
             else:
-                return order
+                res.append(order)
+                return res
