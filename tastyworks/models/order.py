@@ -42,6 +42,8 @@ class TimeInForce(Enum):
 
 @dataclass
 class OrderDetails(object):
+    order_id = None
+    ticker = None
     type: OrderType = None
     time_in_force: TimeInForce = TimeInForce.DAY
     gtc_date: datetime = None
