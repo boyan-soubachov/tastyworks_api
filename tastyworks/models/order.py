@@ -149,7 +149,7 @@ class Order(Security):
         return res
 
     @classmethod
-    async def cancel_order(cls, session, account, order_id) -> List
+    async def cancel_order(cls, session, account, order_id)
         """
         cancels an order on Tastyworks.
 
@@ -171,7 +171,6 @@ class Order(Security):
             order_id
         )
 
-        res = []
         async with aiohttp.request('DELETE', url, headers=session.get_request_headers()) as resp:
             if resp.status != 200:
                 raise Exception('Could not delete the order')
@@ -180,5 +179,4 @@ class Order(Security):
             if order.details.status.is_active():
                 return None
             else:
-                res.append(order)
-                return res
+                return order
