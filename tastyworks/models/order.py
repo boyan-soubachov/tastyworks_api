@@ -97,6 +97,8 @@ class Order(Security):
         Parses an Order object from a dict.
         """
         details = OrderDetails(input_dict['underlying-symbol'])
+        details.order_id = input_dict['id'] if 'id' in input_dict else None
+        details.ticker = input_dict['underlying-symbol'] if 'underlying-symbol' in input_dict else None
         details.price = Decimal(input_dict['price']) if 'price' in input_dict else None
         details.price_effect = OrderPriceEffect(input_dict['price-effect'])
         details.type = OrderType(input_dict['order-type'])
@@ -143,3 +145,37 @@ class Order(Security):
                     continue
                 res.append(order)
         return res
+
+    @classmethod
+    async def cancel_order(cls, session, account, order_id) -> List:
+        """
+        cancels an order on Tastyworks.
+
+        Args:
+            session (TastyAPISession): The session to use.
+            account (TradingAccount): The account_id to get orders on.
+            order_id (OrderDetails): The order_id returned from get_remote_orders.
+            
+
+        Returns:
+            list(Order): A list of Orders. The order will have a cancalled status if successfull.
+        """
+        if not session.logged_in:
+            raise Exception('Tastyworks session not logged in.')
+
+        url = '{}/accounts/{}/orders/{}'.format(
+            session.API_url,
+            account.account_number,
+            order_id
+        )
+
+        res = []
+        async with aiohttp.request('DELETE', url, headers=session.get_request_headers()) as resp:
+            if resp.status != 200:
+                raise Exception('Could not delete the order')
+            data = (await resp.json())['data']
+            order = cls.from_dict(order_data)
+            if order.details.status.is_active():
+                return None
+            else:
+                return order
