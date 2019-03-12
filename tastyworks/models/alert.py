@@ -33,8 +33,8 @@ class Alert:
 
 def from_dict(self, data):
     ret = []
-    for item in data
-        rett.append(Alert(field=item['field'],
+    for item in data:
+        ret.append(Alert(field=item['field'],
               operator=item['operator'],
               threshold=item['threshold'],
               symbol=item['symbol']))
