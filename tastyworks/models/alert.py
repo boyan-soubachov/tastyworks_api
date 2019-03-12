@@ -15,7 +15,7 @@ class Operator(Enum):
     GREATERTHAN = '>'
 
 @dataclass
-class Alert(object)
+class Alert:
     field: Field
     operator: Operator
     symbol: str = ticker
