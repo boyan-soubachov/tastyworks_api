@@ -2,7 +2,7 @@ import logging
 from decimal import Decimal
 from enum import Enum
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 class Field(Enum):
     LAST = 'Last'
@@ -18,8 +18,8 @@ class Operator(Enum):
 class Alert:
     field: Field
     operator: Operator
-    symbol: str = ticker
-    threshold: Decimal = Decimal(price)
+    symbol: str
+    threshold: Decimal
 
     @classmethod
     def get_json(self):
@@ -34,8 +34,8 @@ class Alert:
 def from_dict(self, data):
     ret = []
     for item in data:
-        ret.append(Alert(field=item['field'],
-              operator=item['operator'],
-              threshold=item['threshold'],
+        ret.append(Alert(field=Field(item['field'])
+              operator=Operator(item['operator']),
+              threshold=Decimal(item['threshold']),
               symbol=item['symbol']))
     return ret
