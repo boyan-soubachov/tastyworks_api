@@ -145,7 +145,7 @@ class TradingAccount(object):
         if not session.is_active():
             raise Exception('The supplied session is not active and valid')
 
-        url = '{}/orders'.format(session.API_url)
+        url = '{}/quote-alerts'.format(session.API_url)
 
         body = alert.get_json()
 
@@ -153,9 +153,39 @@ class TradingAccount(object):
             if resp.status == 201:
                 return True
             elif resp.status == 400:
-                raise Exception('Order execution failed, message: {}'.format(await resp.text()))
+                raise Exception('Failed to create the alert, message: {}'.format(await resp.text()))
             else:
                 raise Exception('Unknown remote error, status code: {}, message: {}'.format(resp.status, await resp.text()))
+
+        async def delete_quote_alert(session, alert: Alert):
+            """
+            Delete a quote alert.
+
+            Args:
+                alert (Alert): The Alert object to delete.  This must have the alert_external_id field set.
+                session (TastyAPISession): The tastyworks session onto which to execute the order.
+
+            Returns:
+                bool: Whether the alert creation was successful.
+            """
+
+            if not session.is_active():
+                raise Exception('The supplied session is not active and valid')
+
+            if alert.alert_external_id == '':
+                raise Exception('The supplied alert object does not have the alert_external_id value set.')
+
+            url = '{}/quote-alerts/{}'.format(session.API_url, alert.alert_external_id)
+
+            body = alert.get_json()
+
+            async with aiohttp.request('DELETE', url, headers=session.get_request_headers(), json=body) as resp:
+                if resp.status == 204:
+                    return True
+                elif resp.status == 400:
+                    raise Exception('Failed to delete the quote alert, message: {}'.format(await resp.text()))
+                else:
+                    raise Exception('Unknown remote error, status code: {}, message: {}'.format(resp.status, await resp.text()))
 
     async def get_positions(session, account):
         """
