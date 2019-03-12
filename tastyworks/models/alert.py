@@ -34,7 +34,7 @@ class Alert:
 def from_dict(self, data):
     ret = []
     for item in data:
-        ret.append(Alert(field=Field(item['field'])
+        ret.append(Alert(field=Field(item['field']),
               operator=Operator(item['operator']),
               threshold=Decimal(item['threshold']),
               symbol=item['symbol']))
