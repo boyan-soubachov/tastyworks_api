@@ -8,7 +8,7 @@ class AlertField(Enum):
     LAST = 'Last'
     BID = 'Bid'
     ASK = 'Ask'
-    IVX = 'IVx'
+    IVX = 'IV'
 
 class Operator(Enum):
     LESSTHAN = '<'
