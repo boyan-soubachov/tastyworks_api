@@ -4,6 +4,7 @@ import aiohttp
 from dataclasses import dataclass
 
 from tastyworks.models.order import Order, OrderPriceEffect
+from tastyworks.models.alert import Alert
 
 
 @dataclass
@@ -110,6 +111,51 @@ class TradingAccount(object):
                 raise Exception('Could not get trading account balance info from Tastyworks...')
             data = (await response.json())['data']
         return data
+
+    async def get_quote_alert(session, account):
+    """
+    Get quote alerts.
+
+    Args:
+        session (TastyAPISession): An active and logged-in session object against which to query.
+        account (TradingAccount): The account_id to get balance on.
+    Returns:
+        dict: quote alerts
+    """
+    url = '{}/quote-alerts'.format(session.API_url)
+
+    async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
+        if response.status != 200:
+            raise Exception('Could not get quote alerts from Tastyworks...')
+        data = Alert.from_dict((await response.json())['data']['items'])
+    return data
+
+    async def set_quote_alert(self, alert: Alert, session):
+        """
+        Create a quote alert.
+
+        Args:
+            alert (Alert): The Alert object to create.
+            session (TastyAPISession): The tastyworks session onto which to execute the order.
+
+        Returns:
+            bool: Whether the alert creation was successful.
+        """
+
+        if not session.is_active():
+            raise Exception('The supplied session is not active and valid')
+
+        url = '{}/orders'.format(session.API_url)
+
+        body = alert.get_json()
+
+        async with aiohttp.request('POST', url, headers=session.get_request_headers(), json=body) as resp:
+            if resp.status == 201:
+                return True
+            elif resp.status == 400:
+                raise Exception('Order execution failed, message: {}'.format(await resp.text()))
+            else:
+                raise Exception('Unknown remote error, status code: {}, message: {}'.format(resp.status, await resp.text()))
 
     async def get_positions(session, account):
         """
