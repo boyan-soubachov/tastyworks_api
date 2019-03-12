@@ -31,11 +31,11 @@ class Alert:
         }
         return alert_json
 
-def from_dict(self, data):
+def alert_from_dict(data: dict):
     ret = []
     for item in data:
         ret.append(Alert(field=Field(item['field']),
-              operator=Operator(item['operator']),
-              threshold=Decimal(item['threshold']),
-              symbol=item['symbol']))
+            operator=Operator(item['operator']),
+            threshold=Decimal(item['threshold']),
+            symbol=item['symbol']))
     return ret

@@ -4,7 +4,7 @@ import aiohttp
 from dataclasses import dataclass
 
 from tastyworks.models.order import Order, OrderPriceEffect
-from tastyworks.models.alert import Alert
+from tastyworks.models.alert import Alert, alert_from_dict
 
 
 @dataclass
@@ -127,7 +127,7 @@ class TradingAccount(object):
         async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
             if response.status != 200:
                 raise Exception('Could not get quote alerts from Tastyworks...')
-            data = Alert.from_dict((await response.json())['data']['items'])
+            data = alert_from_dict((await response.json())['data']['items'])
         return data
 
     async def set_quote_alert(self, alert: Alert, session):
