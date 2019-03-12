@@ -112,7 +112,7 @@ class TradingAccount(object):
             data = (await response.json())['data']
         return data
 
-    async def get_quote_alert(session, account):
+    async def get_quote_alert(session):
         """
         Get quote alerts.
 
