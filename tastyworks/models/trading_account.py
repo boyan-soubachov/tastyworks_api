@@ -113,22 +113,22 @@ class TradingAccount(object):
         return data
 
     async def get_quote_alert(session, account):
-    """
-    Get quote alerts.
+        """
+        Get quote alerts.
 
-    Args:
-        session (TastyAPISession): An active and logged-in session object against which to query.
-        account (TradingAccount): The account_id to get balance on.
-    Returns:
-        dict: quote alerts
-    """
-    url = '{}/quote-alerts'.format(session.API_url)
+        Args:
+            session (TastyAPISession): An active and logged-in session object against which to query.
+            account (TradingAccount): The account_id to get balance on.
+        Returns:
+            dict: quote alerts
+        """
+        url = '{}/quote-alerts'.format(session.API_url)
 
-    async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
-        if response.status != 200:
-            raise Exception('Could not get quote alerts from Tastyworks...')
-        data = Alert.from_dict((await response.json())['data']['items'])
-    return data
+        async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
+            if response.status != 200:
+                raise Exception('Could not get quote alerts from Tastyworks...')
+            data = Alert.from_dict((await response.json())['data']['items'])
+        return data
 
     async def set_quote_alert(self, alert: Alert, session):
         """
