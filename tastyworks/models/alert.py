@@ -28,8 +28,8 @@ class Alert:
         'operator': self.operator.value,
         'threshold': '{:.3f}'.format(self.threshold),
         'symbol': self.symbol
-    }
-    return alert_json
+        }
+        return alert_json
 
 def from_dict(self, data):
     ret = []
