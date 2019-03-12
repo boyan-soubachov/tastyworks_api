@@ -130,7 +130,7 @@ class TradingAccount(object):
             data = alert_from_dict((await response.json())['data']['items'])
         return data
 
-    async def set_quote_alert(self, alert: Alert, session):
+    async def set_quote_alert(self, session, alert: Alert):
         """
         Create a quote alert.
 

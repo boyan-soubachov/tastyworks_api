@@ -20,6 +20,9 @@ class Alert:
     operator: Operator
     symbol: str
     threshold: Decimal
+    alert_external_id: str = ''
+    user_external_id: str = ''
+
 
     @classmethod
     def get_json(self):
@@ -37,5 +40,7 @@ def alert_from_dict(data: dict):
         ret.append(Alert(field=Field(item['field']),
             operator=Operator(item['operator']),
             threshold=Decimal(item['threshold']),
-            symbol=item['symbol']))
+            symbol=item['symbol'],
+            user_external_id=item['user-external-id'],
+            alert_external_id=item['alert-external-id']))
     return ret
