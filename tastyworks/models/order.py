@@ -16,7 +16,6 @@ class OrderType(Enum):
     LIMIT = 'Limit'
     MARKET = 'Market'
     STOP_LIMIT = 'Stop Limit'
-    STOP_MARKET = 'Stop Market'
 
 
 class OrderPriceEffect(Enum):
@@ -50,6 +49,7 @@ class OrderDetails(object):
     time_in_force: TimeInForce = TimeInForce.DAY
     gtc_date: datetime = None
     price: Decimal = None
+    stop_trigger: Decimal = None
     price_effect: OrderPriceEffect = None
     status: OrderStatus = None
     legs: List[Security] = field(default_factory=list)
@@ -104,6 +104,7 @@ class Order(Security):
         details.order_id = input_dict['id'] if 'id' in input_dict else None
         details.ticker = input_dict['underlying-symbol'] if 'underlying-symbol' in input_dict else None
         details.price = Decimal(input_dict['price']) if 'price' in input_dict else None
+        details.stop_trigger = Decimal(input_dict['stop-trigger']) if 'stop-trigger' in input_dict else None
         details.price_effect = OrderPriceEffect(input_dict['price-effect'])
         details.type = OrderType(input_dict['order-type'])
         details.status = OrderStatus(input_dict['status'])
