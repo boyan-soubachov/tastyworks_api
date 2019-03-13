@@ -261,7 +261,7 @@ def _get_execute_order_json(order: Order):
         'legs': _get_legs_request_data(order)
     }
 
-    if order.details.type == OrderType.STOP_LIMIT:
+    if order.details.type == OrderType.STOP_LIMIT or order.details.type == OrderType.STOP:
         order_json['stop-trigger'] = '{:.2f}'.format(order.details.stop_trigger)
     
     if not order.details.type == OrderType.STOP:
