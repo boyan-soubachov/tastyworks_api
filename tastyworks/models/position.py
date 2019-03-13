@@ -33,11 +33,11 @@ class Position(object):
     average_yearly_market_close_price: Decimal = None
     mark: Decimal = None
     mark_price: Decimal = None
-    multiplier: int = None
+    multiplier: int = 100
     cost_effect: PositionCostEffect = PositionCostEffect.NONE
     is_suppressed: bool = None
     is_frozen: bool = None
-    restricted_quantity: int = None
+    restricted_quantity: int = 0
     realized_day_gain: Decimal = None
     realized_day_gain_effect: PositionCostEffect = PositionCostEffect.NONE
     realized_day_gain_date: date = None
@@ -83,9 +83,9 @@ class Position(object):
         position.restricted_quantity = int(input_dict['restricted-quantity'])
         position.realized_day_gain = Decimal(input_dict['realized-day-gain'])
         position.realized_day_gain_effect = PositionCostEffect(input_dict['realized-day-gain-effect'])
-        position.realized_day_gain_date = date(input_dict['realized-day-gain-date'])
-        position.created_at = datetime(input_dict['created-at'])
-        position.updated_at = datetime(input_dict['updated-at'])
+        position.realized_day_gain_date = datetime.strptime(input_dict['realized-day-gain-date'], '%Y-%m-%d').date()
+        position.created_at = datetime.strptime(input_dict['created-at'].split('+')[0], '%Y-%m-%dT%H:%M:%S.%f')
+        position.updated_at = datetime.strptime(input_dict['updated-at'].split('+')[0], '%Y-%m-%dT%H:%M:%S.%f')
         return cls(position)
 
     @classmethod
