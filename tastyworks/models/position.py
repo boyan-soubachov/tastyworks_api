@@ -66,9 +66,9 @@ class Position(object):
         elif self.cost_effect == PositionCostEffect.DEBIT:
             return OrderPriceEffect.DEBIT
 
-    def get_closing_order_object(self, price: Decimal, order_type: OrderType = OrderType.LIMIT):
+    def get_closing_order_object(self, price: Decimal, stop_trigger: Decimal = None, order_type: OrderType = OrderType.LIMIT):
         closing_order_price_effect = self.get_closing_order_price_effect()
-        details = OrderDetails(type=order_type, price=price, price_effect=closing_order_price_effect)
+        details = OrderDetails(type=order_type, price=price, price_effect=closing_order_price_effect, stop_trigger=stop_trigger)
         new_order = Order(details)
         opt = self.get_option_obj()
         new_order.add_leg(opt)
