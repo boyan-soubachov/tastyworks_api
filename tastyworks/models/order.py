@@ -16,6 +16,7 @@ class OrderType(Enum):
     LIMIT = 'Limit'
     MARKET = 'Market'
     STOP_LIMIT = 'Stop Limit'
+    STOP = 'Stop'
 
 
 class OrderPriceEffect(Enum):
@@ -58,13 +59,26 @@ class OrderDetails(object):
     def is_executable(self) -> bool:
         required_data = all([
             self.time_in_force,
-            self.price_effect,
-            self.price is not None,
             self.type,
             self.source
         ])
 
+        if self.type == OrderType.STOP:
+            non_stop_required_data = all([
+                self.price_effect,
+                self.price is None
+            ])
+        else:
+            non_stop_required_data = all([
+                self.price_effect,
+                self.price is not None
+            ])
+            
+
         if not required_data:
+            return False
+
+        if not non_stop_required_data:
             return False
 
         if not self.legs:
@@ -105,7 +119,7 @@ class Order(Security):
         details.ticker = input_dict['underlying-symbol'] if 'underlying-symbol' in input_dict else None
         details.price = Decimal(input_dict['price']) if 'price' in input_dict else None
         details.stop_trigger = Decimal(input_dict['stop-trigger']) if 'stop-trigger' in input_dict else None
-        details.price_effect = OrderPriceEffect(input_dict['price-effect'])
+        details.price_effect = OrderPriceEffect(input_dict['price-effect']) if 'price-effect' in input_dict else None
         details.type = OrderType(input_dict['order-type'])
         details.status = OrderStatus(input_dict['status'])
         details.time_in_force = input_dict['time-in-force']

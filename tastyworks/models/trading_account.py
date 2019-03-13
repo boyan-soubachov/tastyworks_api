@@ -256,7 +256,6 @@ def _get_execute_order_json(order: Order):
     order_json = {
         'source': order.details.source,
         'order-type': order.details.type.value,
-        'price': '{:.2f}'.format(order.details.price),
         'price-effect': order.details.price_effect.value,
         'time-in-force': order.details.time_in_force.value,
         'legs': _get_legs_request_data(order)
@@ -264,6 +263,9 @@ def _get_execute_order_json(order: Order):
 
     if order.details.type == OrderType.STOP_LIMIT:
         order_json['stop-trigger'] = '{:.2f}'.format(order.details.stop_trigger)
+    
+    if not order.details.type == OrderType.STOP:
+        order_json['price'] = '{:.2f}'.format(order.details.price)
 
     if order.details.gtc_date:
         order_json['gtc-date'] = order.details.gtc_date.strftime('%Y-%m-%d')
