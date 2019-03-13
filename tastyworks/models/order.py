@@ -15,6 +15,8 @@ LOGGER = logging.getLogger(__name__)
 class OrderType(Enum):
     LIMIT = 'Limit'
     MARKET = 'Market'
+    STOP_LIMIT = 'Stop Limit'
+    STOP_MARKET = 'Stop Market'
 
 
 class OrderPriceEffect(Enum):
