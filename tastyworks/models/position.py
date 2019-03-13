@@ -73,7 +73,7 @@ class Position(object):
         position.average_open_price = Decimal(input_dict['average-open-price'])
         position.average_yearly_market_close_price = Decimal(input_dict['average-yearly-market-close-price'])
         position.mark = Decimal(input_dict['mark'])
-        position.mark-price = Decimal(input_dict['mark-price'])
+        position.mark_price = Decimal(input_dict['mark-price'])
         position.multiplier = int(input_dict['multiplier'])
         position.cost_effect = PositionCostEffect(input_dict['cost-effect'])
         position.is_suppressed = bool(input_dict['is-suppressed'])
