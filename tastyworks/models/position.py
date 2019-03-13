@@ -64,7 +64,7 @@ class Position(object):
         """
         Parses a Position object from a dict.
         """
-        position = Position(input_dict)
+        position = cls(input_dict)
         position.account_number = input_dict['account-number']
         position.symbol = input_dict['symbol']
         position.instrument_type = InstrumentType(input_dict['instrument-type'])
