@@ -157,10 +157,9 @@ class Order(Security):
             session (TastyAPISession): The session to use.
             account (TradingAccount): The account_id to get orders on.
             order_id (OrderDetails): The order_id returned from get_remote_orders.
-            
 
         Returns:
-            list(Order): A list of Orders. The order will have a cancalled status if successfull.
+            A single order. The order will have a cancalled status if successfull.
         """
         if not session.logged_in:
             raise Exception('Tastyworks session not logged in.')

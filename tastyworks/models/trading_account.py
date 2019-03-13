@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 from tastyworks.models.order import Order, OrderPriceEffect
 from tastyworks.models.alert import Alert
+from tastyworks.models.position import Position
 
 
 @dataclass
@@ -205,7 +206,7 @@ class TradingAccount(object):
         async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
             if response.status != 200:
                 raise Exception('Could not get open positions info from Tastyworks...')
-            data = (await response.json())['data']['items']
+            data = Position.list_from_dict((await response.json())['data']['items'])
         return data
 
     async def get_live_orders(session, account):
