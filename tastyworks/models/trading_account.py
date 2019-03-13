@@ -3,7 +3,7 @@ from typing import List
 import aiohttp
 from dataclasses import dataclass
 
-from tastyworks.models.order import Order, OrderPriceEffect
+from tastyworks.models.order import Order, OrderPriceEffect, OrderType
 from tastyworks.models.alert import Alert
 from tastyworks.models.position import Position
 
@@ -261,6 +261,9 @@ def _get_execute_order_json(order: Order):
         'time-in-force': order.details.time_in_force.value,
         'legs': _get_legs_request_data(order)
     }
+
+    if order.details.type == OrderType.STOP_LIMIT:
+        order_json['stop-trigger'] = '{:.2f}'.format(order.details.stop_trigger)
 
     if order.details.gtc_date:
         order_json['gtc-date'] = order.details.gtc_date.strftime('%Y-%m-%d')
