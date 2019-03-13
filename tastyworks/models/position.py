@@ -13,31 +13,33 @@ class PositionCostEffect(Enum):
 
 class InstrumentType(Enum):
     EQUITY_OPTION = 'Equity Option'
+    NONE = None
 
 class QuantityDirection(Enum):
     LONG = 'Long'
     SHORT = 'Short'
+    NONE = None
 
 @dataclass
 class Position(object):
     account_number: str = None
     symbol: str = None
-    instrument_type: InstrumentType = None
+    instrument_type: InstrumentType = InstrumentType.NONE
     underlying_symbol: str = None
     quantity: int = None
-    quantity_direction: QuantityDirection = None
+    quantity_direction: QuantityDirection = QuantityDirection.NONE
     close_price: Decimal = None
     average_open_price: Decimal = None
     average_yearly_market_close_price: Decimal = None
     mark: Decimal = None
     mark_price: Decimal = None
     multiplier: int = None
-    cost_effect: PositionCostEffect = None
+    cost_effect: PositionCostEffect = PositionCostEffect.NONE
     is_suppressed: bool = None
     is_frozen: bool = None
     restricted_quantity: int = None
     realized_day_gain: Decimal = None
-    realized_day_gain_effect: PositionCostEffect = None
+    realized_day_gain_effect: PositionCostEffect = PositionCostEffect.NONE
     realized_day_gain_date: date = None
     created_at: datetime = None
     updated_at: datetime = None
