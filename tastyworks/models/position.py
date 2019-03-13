@@ -86,7 +86,7 @@ class Position(object):
         position.realized_day_gain_date = datetime.strptime(input_dict['realized-day-gain-date'], '%Y-%m-%d').date()
         position.created_at = datetime.strptime(input_dict['created-at'].split('+')[0], '%Y-%m-%dT%H:%M:%S.%f')
         position.updated_at = datetime.strptime(input_dict['updated-at'].split('+')[0], '%Y-%m-%dT%H:%M:%S.%f')
-        return cls(position)
+        return position
 
     @classmethod
     def list_from_dict(cls, input_dict) -> list:
