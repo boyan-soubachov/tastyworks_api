@@ -9,7 +9,7 @@ from dataclasses import dataclass
 class PositionCostEffect(Enum):
     CREDIT = 'Credit'
     DEBIT = 'Debit'
-    NONE = None
+    NONE = 'None'
 
 class InstrumentType(Enum):
     EQUITY_OPTION = 'Equity Option'
