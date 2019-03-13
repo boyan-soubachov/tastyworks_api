@@ -66,7 +66,7 @@ class Position(object):
         elif self.cost_effect == PositionCostEffect.DEBIT:
             return OrderPriceEffect.CREDIT
 
-    def get_closing_order_object(self, price: Decimal = self.mark_price, order_type: OrderType = OrderType.LIMIT):
+    def get_closing_order_object(self, price: Decimal, order_type: OrderType = OrderType.LIMIT):
         closing_order_price_effect = self.get_closing_order_price_effect()
         details = OrderDetails(type=order_type, price=price, price_effect=closing_order_price_effect)
         new_order = Order(details)
