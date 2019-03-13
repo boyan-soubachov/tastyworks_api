@@ -20,27 +20,27 @@ class QuantityDirection(Enum):
 
 @dataclass
 class Position(object):
-    account_number: str
-    symbol: str
-    instrument_type: InstrumentType
-    underlying_symbol: str
-    quantity: int
-    quantity_direction: QuantityDirection
-    close_price: Decimal
-    average_open_price: Decimal
-    average_yearly_market_close_price: Decimal
-    mark: Decimal
-    mark_price: Decimal
-    multiplier: int
-    cost_effect: PositionCostEffect
-    is_suppressed: bool
-    is_frozen: bool
-    restricted_quantity: int
-    realized_day_gain: Decimal
-    realized_day_gain_effect: PositionCostEffect
-    realized_day_gain_date: date
-    created_at: datetime
-    updated_at: datetime
+    account_number: str = None
+    symbol: str = None
+    instrument_type: InstrumentType = None
+    underlying_symbol: str = None
+    quantity: int = None
+    quantity_direction: QuantityDirection = None
+    close_price: Decimal = None
+    average_open_price: Decimal = None
+    average_yearly_market_close_price: Decimal = None
+    mark: Decimal = None
+    mark_price: Decimal = None
+    multiplier: int = None
+    cost_effect: PositionCostEffect = None
+    is_suppressed: bool = None
+    is_frozen: bool = None
+    restricted_quantity: int = None
+    realized_day_gain: Decimal = None
+    realized_day_gain_effect: PositionCostEffect = None
+    realized_day_gain_date: date = None
+    created_at: datetime = None
+    updated_at: datetime = None
 
     def get_last_stock_price_alert_oobject(self, Price: Decimal):
         return Alert(alert_field=AlertField('Last'),operator=self.get_alert_operator(),threshold=Price,symbol=self.underlying_symbol)
