@@ -26,8 +26,7 @@ class Alert:
     user_external_id: str = ''
 
     def get_json(self):
-        alert_json = {
-                    'field': self.alert_field.value,
+        alert_json = {'field': self.alert_field.value,
                     'operator': self.operator.value,
                     'threshold': '{:.3f}'.format(self.threshold),
                     'symbol': self.symbol
