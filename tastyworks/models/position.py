@@ -7,6 +7,7 @@ from tastyworks.models.underlying import UnderlyingType
 from enum import Enum
 from dataclasses import dataclass
 
+
 class PositionCostEffect(Enum):
     CREDIT = 'Credit'
     DEBIT = 'Debit'
@@ -75,7 +76,7 @@ class Position(object):
         return new_order
 
     def get_last_stock_price_alert_oobject(self, Price: Decimal):
-        return Alert(alert_field=AlertField('Last'), operator=self.get_alert_operator(), threshold=Price,symbol=self.underlying_symbol)
+        return Alert(alert_field=AlertField('Last'), operator=self.get_alert_operator(), threshold=Price, symbol=self.underlying_symbol)
 
     def get_alert_operator(self):
         if self.quantity_direction == QuantityDirection.LONG:       # Call

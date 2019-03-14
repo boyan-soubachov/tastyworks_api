@@ -74,7 +74,6 @@ class OrderDetails(object):
                 self.price is not None
             ])
 
-
         if not required_data:
             return False
 
