@@ -47,7 +47,7 @@ class Alert:
                              alert_external_id=item['alert-external-id'])
             if 'triggered-at' in item:
                 alert.triggered_at = datetime.strptime(item['triggered-at'].split('+')[0], '%Y-%m-%dT%H:%M:%S.%f')
-                if datetime.utcnow() < alert.triggered_at:
+                if datetime.utcnow() > alert.triggered_at:
                     alert.triggered = True
             ret.append(alert)
         return ret
