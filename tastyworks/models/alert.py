@@ -1,6 +1,7 @@
 from decimal import Decimal
 from enum import Enum
-
+import pytz
+from datetime import datetime
 from dataclasses import dataclass
 
 
@@ -24,6 +25,8 @@ class Alert:
     threshold: Decimal
     alert_external_id: str = ''
     user_external_id: str = ''
+    triggered_at: datetime = None
+    triggered: bool = False
 
     def get_json(self):
         alert_json = {'field': self.alert_field.value,
@@ -37,10 +40,15 @@ class Alert:
     def from_dict(data: dict):
         ret = []
         for item in data:
-            ret.append(Alert(alert_field=AlertField(item['field']),
+            alert = Alert(alert_field=AlertField(item['field']),
                              operator=Operator(item['operator']),
                              threshold=Decimal(item['threshold']),
                              symbol=item['symbol'],
                              user_external_id=item['user-external-id'],
-                             alert_external_id=item['alert-external-id']))
+                             alert_external_id=item['alert-external-id'])
+            if 'triggered-at' in item:
+                alert.triggered_at = datetime.strptime(input_dict['updated-at'].split('+')[0], '%Y-%m-%dT%H:%M:%S.%f')
+                if datetime.utcnow() < alert.triggered_at:
+                    alert.triggered = True
+            ret.append(alert)
         return ret
