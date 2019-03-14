@@ -1,4 +1,3 @@
-import logging
 from decimal import Decimal
 from enum import Enum
 
@@ -28,10 +27,10 @@ class Alert:
 
     def get_json(self):
         alert_json = {
-                'field': self.alert_field.value,
-                'operator': self.operator.value,
-                'threshold': '{:.3f}'.format(self.threshold),
-                'symbol': self.symbol
+                    'field': self.alert_field.value,
+                    'operator': self.operator.value,
+                    'threshold': '{:.3f}'.format(self.threshold),
+                    'symbol': self.symbol
         }
         return alert_json
 
