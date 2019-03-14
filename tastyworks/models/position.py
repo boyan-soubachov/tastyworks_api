@@ -4,10 +4,7 @@ from tastyworks.models.alert import Alert, AlertField, Operator
 from tastyworks.models.order import (Order, OrderDetails, OrderPriceEffect, OrderType)
 from tastyworks.models.option import Option, OptionType
 from tastyworks.models.underlying import UnderlyingType
-
-import string
 from enum import Enum
-
 from dataclasses import dataclass
 
 class PositionCostEffect(Enum):
@@ -15,14 +12,17 @@ class PositionCostEffect(Enum):
     DEBIT = 'Debit'
     NONE = 'None'
 
+
 class InstrumentType(Enum):
     EQUITY_OPTION = 'Equity Option'
     NONE = None
+
 
 class QuantityDirection(Enum):
     LONG = 'Long'
     SHORT = 'Short'
     NONE = None
+
 
 @dataclass
 class Position(object):
@@ -57,7 +57,7 @@ class Position(object):
     def get_option_obj(self):
         exp_date = datetime.strptime(self.symbol[6:12], '%y%m%d').date()
         option_type = OptionType(self.symbol[12:13])
-        strike = Decimal(self.symbol[13:])/1000
+        strike = Decimal(self.symbol[13:]) / 1000
         return Option(ticker=self.underlying_symbol, quantity=self.quantity, expiry=exp_date, strike=strike, option_type=option_type, underlying_type=UnderlyingType.EQUITY)
 
     def get_closing_order_price_effect(self):
@@ -75,7 +75,7 @@ class Position(object):
         return new_order
 
     def get_last_stock_price_alert_oobject(self, Price: Decimal):
-        return Alert(alert_field=AlertField('Last'),operator=self.get_alert_operator(),threshold=Price,symbol=self.underlying_symbol)
+        return Alert(alert_field=AlertField('Last'), operator=self.get_alert_operator(), threshold=Price,symbol=self.underlying_symbol)
 
     def get_alert_operator(self):
         if self.quantity_direction == QuantityDirection.LONG:       # Call

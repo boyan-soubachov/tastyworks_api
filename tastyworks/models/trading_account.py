@@ -263,7 +263,7 @@ def _get_execute_order_json(order: Order):
 
     if order.details.type == OrderType.STOP_LIMIT or order.details.type == OrderType.STOP:
         order_json['stop-trigger'] = '{:.2f}'.format(order.details.stop_trigger)
-    
+
     if not order.details.type == OrderType.STOP:
         order_json['price'] = '{:.2f}'.format(order.details.price)
 
