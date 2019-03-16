@@ -132,7 +132,7 @@ class Order(Security):
         details.time_in_force = input_dict['time-in-force']
         details.gtc_date = input_dict.get('gtc-date', None)
         order = cls(order_details=details)
-        for leg in input_dict['legs']
+        for leg in input_dict['legs']:
             if leg['instrument-type'] == 'Equity Option':
                 leg_obj = order.get_equity_leg_from_dict(leg)
                 order.details.legs.append(leg_obj)
