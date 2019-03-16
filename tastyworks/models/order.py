@@ -63,7 +63,7 @@ class OrderDetails(object):
             self.source
         ])
 
-        if self.type == OrderType.STOP:
+        if self.type == OrderType.STOP or self.type == OrderType.MARKET:
             non_stop_required_data = all([
                 self.price_effect,
                 self.price is None
