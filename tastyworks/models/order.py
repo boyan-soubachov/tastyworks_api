@@ -196,6 +196,8 @@ class Order(Security):
             data = (await resp.json())['data']['items']
             for order_data in data:
                 order = cls.from_dict(order_data)
+                if not order.details.status.is_active():
+                    continue
                 res.append(order)
         return res
 
