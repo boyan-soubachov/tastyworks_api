@@ -114,7 +114,7 @@ class Order(Security):
         exp_date = datetime.strptime(input_dict['symbol'][6:12], '%y%m%d').date()
         option_type = OptionType(input_dict['symbol'][12:13])
         strike = Decimal(input_dict['symbol'][13:]) / 1000
-        return Option(ticker=self.details.underlying_symbol, quantity=input_dict['quantity'], expiry=exp_date, strike=strike, option_type=option_type, underlying_type=UnderlyingType.EQUITY)
+        return Option(ticker=self.details.ticker, quantity=input_dict['quantity'], expiry=exp_date, strike=strike, option_type=option_type, underlying_type=UnderlyingType.EQUITY)
 
     @classmethod
     def from_dict(cls, input_dict: dict):
