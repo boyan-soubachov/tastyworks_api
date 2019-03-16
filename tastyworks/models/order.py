@@ -159,15 +159,13 @@ class Order(Security):
             data = (await resp.json())['data']['items']
             for order_data in data:
                 order = cls.from_dict(order_data)
-                if not order.details.status.is_active():
-                    continue
                 res.append(order)
         return res
 
     @classmethod
     async def get_live_orders(cls, session, account, **kwargs) -> List:
         """
-        Gets all orders on Tastyworks.
+        Gets all live orders on Tastyworks.
 
         Args:
             session (TastyAPISession): The session to use.
@@ -198,8 +196,6 @@ class Order(Security):
             data = (await resp.json())['data']['items']
             for order_data in data:
                 order = cls.from_dict(order_data)
-                if not order.details.status.is_active():
-                    continue
                 res.append(order)
         return res
 
