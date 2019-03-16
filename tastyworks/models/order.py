@@ -3,6 +3,8 @@ from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 from typing import List
+from tastyworks.models.option import Option, OptionType
+from tastyworks.models.underlying import UnderlyingType
 
 import aiohttp
 from dataclasses import dataclass, field
@@ -108,6 +110,12 @@ class Order(Security):
     def add_leg(self, security: Security):
         self.details.legs.append(security)
 
+    def get_equity_leg_from_dict(self, input_dict: dict):
+        exp_date = datetime.strptime(input_dict['symbol'][6:12], '%y%m%d').date()
+        option_type = OptionType(input_dict['symbol'][12:13])
+        strike = Decimal(input_dict['symbol'][13:]) / 1000
+        return Option(ticker=self.details.underlying_symbol, quantity=input_dict['quantity'], expiry=exp_date, strike=strike, option_type=option_type, underlying_type=UnderlyingType.EQUITY)
+
     @classmethod
     def from_dict(cls, input_dict: dict):
         """
@@ -123,7 +131,12 @@ class Order(Security):
         details.status = OrderStatus(input_dict['status'])
         details.time_in_force = input_dict['time-in-force']
         details.gtc_date = input_dict.get('gtc-date', None)
-        return cls(order_details=details)
+        order = cls(order_details=details)
+        for leg in input_dict['legs']
+            if leg['instrument-type'] == 'Equity Option':
+                leg_obj = order.get_equity_leg_from_dict(leg)
+                order.details.legs.append(leg_obj)
+        return order
 
     @classmethod
     async def get_remote_orders(cls, session, account, **kwargs) -> List:
@@ -229,6 +242,6 @@ class Order(Security):
             data = (await resp.json())['data']
             order = cls.from_dict(data)
             if order.details.status.is_active():
-                return None
+                return False
             else:
-                return order
+                return True
