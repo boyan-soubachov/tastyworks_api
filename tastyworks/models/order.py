@@ -165,6 +165,45 @@ class Order(Security):
         return res
 
     @classmethod
+    async def get_live_orders(cls, session, account, **kwargs) -> List:
+        """
+        Gets all orders on Tastyworks.
+
+        Args:
+            session (TastyAPISession): The session to use.
+            account (TradingAccount): The account_id to get orders on.
+            Keyword arguments specifying filtering conditions, these include:
+            `status`, `time-in-force`, etc.
+
+        Returns:
+            list(Order): A list of Orders
+        """
+        if not session.logged_in:
+            raise Exception('Tastyworks session not logged in.')
+
+        filters = kwargs
+        url = '{}/accounts/{}/orders/live'.format(
+            session.API_url,
+            account.account_number
+        )
+        url = '{}?{}'.format(
+            url,
+            '&'.join([f'{k}={v}' for k, v in filters.items()])
+        )
+
+        res = []
+        async with aiohttp.request('GET', url, headers=session.get_request_headers()) as resp:
+            if resp.status != 200:
+                raise Exception('Could not get current open orders')
+            data = (await resp.json())['data']['items']
+            for order_data in data:
+                order = cls.from_dict(order_data)
+                if not order.details.status.is_active():
+                    continue
+                res.append(order)
+        return res
+
+    @classmethod
     async def cancel_order(cls, session, account, order_id):
         """
         cancels an order on Tastyworks.
