@@ -79,16 +79,14 @@ class Position(object):
         return Alert(alert_field=AlertField('Last'), operator=self.get_alert_operator(), threshold=Price, symbol=self.underlying_symbol)
 
     def get_alert_operator(self):
-        if self.quantity_direction == QuantityDirection.LONG:       # Call
-            if self.cost_effect == PositionCostEffect.CREDIT:       # Buy
+        if self.is_option:
+            option_obj = self.get_option_obj()
+            if option_obj.option_type == OptionType.CALL:
                 return Operator.LESSTHAN
-            elif self.cost_effect == PositionCostEffect.DEBIT:      # Sell
+            elif option_obj.option_type == OptionType.PUT:
                 return Operator.GREATERTHAN
-        elif self.quantity_direction == QuantityDirection.SHORT:    # Put
-            if self.cost_effect == PositionCostEffect.CREDIT:       # Buy
-                return Operator.GREATERTHAN
-            elif self.cost_effect == PositionCostEffect.DEBIT:      # Sell
-                return Operator.LESSTHAN
+        else:
+            return Operator.LESSTHAN
 
     @classmethod
     def from_dict(cls, input_dict: dict):
