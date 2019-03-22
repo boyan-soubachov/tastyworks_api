@@ -33,9 +33,10 @@ class OrderStatus(Enum):
     EXPIRED = 'Expired'
     LIVE = 'Live'
     REJECTED = 'Rejected'
+    CANCEL_REQUESTED = 'Cancel Requested'
 
     def is_active(self):
-        return self in (OrderStatus.LIVE, OrderStatus.RECEIVED)
+        return self in (OrderStatus.LIVE, OrderStatus.RECEIVED, OrderStatus.CANCEL_REQUESTED)
 
 
 class TimeInForce(Enum):
@@ -241,7 +242,33 @@ class Order(Security):
                 raise Exception('Could not delete the order')
             data = (await resp.json())['data']
             order = cls.from_dict(data)
-            if order.details.status.is_active():
-                return False
-            else:
-                return True
+            return order.details.status
+
+    @classmethod
+    async def get_order(cls, session, account, order_id):
+        """
+        gets an order by the order id on Tastyworks.
+
+        Args:
+            session (TastyAPISession): The session to use.
+            account (TradingAccount): The account_id to get orders on.
+            order_id (OrderDetails): The order_id returned from get_remote_orders.
+
+        Returns:
+            A single order. The order will have a cancalled status if successfull.
+        """
+        if not session.logged_in:
+            raise Exception('Tastyworks session not logged in.')
+
+        url = '{}/accounts/{}/orders/{}'.format(
+            session.API_url,
+            account.account_number,
+            order_id
+        )
+
+        async with aiohttp.request('GET', url, headers=session.get_request_headers()) as resp:
+            if resp.status != 200:
+                raise Exception('Could not retreive the order')
+            data = (await resp.json())['data']
+            order = cls.from_dict(data)
+            return order
