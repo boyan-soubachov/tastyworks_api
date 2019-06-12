@@ -23,5 +23,8 @@ def map_message(message):
         res = summary.Summary(data=message)
     elif profile.Profile.DXFEED_TEXT == msg_type:
         res = profile.Profile(data=message)
+    else:
+        LOGGER.warning("Unknown message type received from streamer: {}".format(message))
+        res = [{'warning': 'Unknown message type received', 'message': message}]
 
     return res
