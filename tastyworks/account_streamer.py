@@ -41,11 +41,13 @@ class AccountStreamer(object):
         #await self.connection.recv()
 
     def __get_action_msg(self, action, value=None, request_id=None) -> List:
-        msg = {"action":action }
+        msg = {
+            "action": action,
+            "request-id": request_id,
+            "auth-token": self.tasty_session.session_token,
+        }
         if value:
             msg["value"] = value
-        if request_id:
-            msg["request-id"] = request_id
 
         return json.dumps(msg)
 
@@ -53,9 +55,7 @@ class AccountStreamer(object):
         return self.__get_action_msg('account-subscribe', accounts, request_id)
 
     def _get_heartbeat_msg(self) -> List:
-        msg = self.__get_action_msg('heartbeat')
-        msg["auth-token"] = self.tasty_session.session_token
-        return msg
+        return self.__get_action_msg('heartbeat')
 
     async def _consumer(self, message):
         msg_object = json.loads(message)
@@ -105,7 +105,7 @@ class AccountStreamer(object):
         while True:
             LOGGER.debug('Sending keep-alive message')
             await self._send_msg(self._get_heartbeat_msg())
-            await asyncio.sleep(period / 1000)
+            await asyncio.sleep(period / 5000)
 
     async def listen(self):
         async for msg in self.connection:

@@ -77,8 +77,7 @@ async def main_loop(session: TastyAPISession, streamer: AccountStreamer):
 
     # Will log out the accounts in use and then create a closing order automatically
     async for item in streamer.listen():
-        #LOGGER.info('Received item: %s' % item)
-
+        #LOGGER.info("Original Received item: %s" % item)
         myclass = AccountEvent.from_dict(item)
         is_account_subscribe = type(myclass) is ActionAccountEvent and myclass.action_enum == ActionAccountEventType.ACCOUNT_SUBSCRIBE
         is_order = type(myclass) is ChangeAccountEvent and myclass.type_enum == ChangeAccountEventType.ORDER
