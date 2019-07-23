@@ -55,7 +55,7 @@ class AccountEvent(object):
 class ActionAccountEvent(AccountEvent):
     action: str
     action_enum: ActionAccountEventType = field(init=False, repr=False)
-    message: str
+    message: str = None
     value: List[str] = None
 
     def __post_init__(self):
