@@ -1,7 +1,5 @@
 import aiohttp
 
-from tastyworks.dough import BASE_URL
-
 
 class Watchlist(object):
     def __init__(self, name=None, slug=None):
@@ -23,10 +21,18 @@ class WatchlistGroup(object):
     def __init__(self):
         self.watchlists = {}
 
-    async def load_watchlists(self):
-        request_url = '{}/public_watchlists?include_synthetic=true'.format(
-            BASE_URL
+    async def load_watchlists(self, session):
+        """
+        Gets watchlists
+
+        Args:
+            session (TastyAPISession): The session to use.
+        """
+
+        request_url = '{}/public-watchlists'.format(
+            session.API_url
         )
+        # /watchlists is the end point for user created watchlists
 
         async with aiohttp.request('GET', request_url) as resp:
             if resp.status != 200:
