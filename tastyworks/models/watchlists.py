@@ -30,7 +30,6 @@ class WatchlistGroup(object):
         Args:
             session (TastyAPISession): The session to use.
         """
-
         request_url = '{}/public-watchlists'.format(
             session.API_url
         )
