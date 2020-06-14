@@ -23,7 +23,9 @@ class WatchlistGroup(object):
 
     async def load_watchlists(self, session):
         """
-        Gets watchlists
+        Get's a users public watchlists.
+        
+        For user created watchlists use '/watchlists' instead.
 
         Args:
             session (TastyAPISession): The session to use.
@@ -32,7 +34,6 @@ class WatchlistGroup(object):
         request_url = '{}/public-watchlists'.format(
             session.API_url
         )
-        # /watchlists is the end point for user created watchlists
 
         async with aiohttp.request('GET', request_url) as resp:
             if resp.status != 200:
