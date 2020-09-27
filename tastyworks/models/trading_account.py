@@ -90,7 +90,7 @@ class TradingAccount(object):
 
         return res
 
-    async def get_balance(session, account):
+    async def get_balance(self, session, account):
         """
         Get balance.
 
@@ -111,7 +111,7 @@ class TradingAccount(object):
             data = (await response.json())['data']
         return data
 
-    async def get_positions(session, account):
+    async def get_positions(self, session, account):
         """
         Get Open Positions.
 
@@ -132,7 +132,7 @@ class TradingAccount(object):
             data = (await response.json())['data']['items']
         return data
 
-    async def get_live_orders(session, account):
+    async def get_live_orders(self, session, account):
         """
         Get live Orders.
 
@@ -153,7 +153,7 @@ class TradingAccount(object):
             data = (await response.json())['data']['items']
         return data
 
-    async def get_history(session, account):
+    async def get_history(self, session, account):
         """
         Get live Orders.
 
