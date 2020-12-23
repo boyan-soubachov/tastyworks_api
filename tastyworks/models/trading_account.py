@@ -4,6 +4,7 @@ import aiohttp
 from dataclasses import dataclass
 
 from tastyworks.models.order import Order, OrderPriceEffect
+from tastyworks.models.session import TastyAPISession
 
 
 @dataclass
@@ -11,14 +12,14 @@ class TradingAccount(object):
     account_number: str
     external_id: str
     is_margin: bool
+    session: TastyAPISession
 
-    async def execute_order(self, order: Order, session, dry_run=True):
+    async def execute_order(self, order: Order, dry_run=True):
         """
         Execute an order. If doing a dry run, the order isn't placed but simulated (server-side).
 
         Args:
             order (Order): The order object to execute.
-            session (TastyAPISession): The tastyworks session onto which to execute the order.
             dry_run (bool): Whether to do a test (dry) run.
 
         Returns:
@@ -27,11 +28,11 @@ class TradingAccount(object):
         if not order.check_is_order_executable():
             raise Exception('Order is not executable, most likely due to missing data')
 
-        if not session.is_active():
-            raise Exception('The supplied session is not active and valid')
+        if not self.session.is_active():
+            raise Exception('The session is not active or valid')
 
         url = '{}/accounts/{}/orders'.format(
-            session.API_url,
+            self.session.API_url,
             self.account_number
         )
         if dry_run:
@@ -39,7 +40,7 @@ class TradingAccount(object):
 
         body = _get_execute_order_json(order)
 
-        async with aiohttp.request('POST', url, headers=session.get_request_headers(), json=body) as resp:
+        async with aiohttp.request('POST', url, headers=self.session.get_request_headers(), json=body) as resp:
             if resp.status == 201:
                 return True
             elif resp.status == 400:
@@ -48,14 +49,15 @@ class TradingAccount(object):
                 raise Exception('Unknown remote error, status code: {}, message: {}'.format(resp.status, await resp.text()))
 
     @classmethod
-    def from_dict(cls, data: dict) -> List:
+    def from_dict(cls, data: dict, session: TastyAPISession) -> List:
         """
         Parses a TradingAccount object from a dict.
         """
         new_data = {
             'is_margin': True if data['margin-or-cash'] == 'Margin' else False,
             'account_number': data['account-number'],
-            'external_id': data['external-id']
+            'external_id': data['external-id'],
+            'session': session
         }
 
         res = TradingAccount(**new_data)
@@ -63,7 +65,7 @@ class TradingAccount(object):
         return res
 
     @classmethod
-    async def get_remote_accounts(cls, session) -> List:
+    async def get_accounts(cls, session) -> List:
         """
         Gets all trading accounts from the Tastyworks platform.
 
@@ -78,101 +80,106 @@ class TradingAccount(object):
 
         async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
             if response.status != 200:
-                raise Exception('Could not get trading accounts info from Tastyworks...')
+                raise Exception(f'HTTP {response.status} during GET accounts')
             data = (await response.json())['data']
 
         for entry in data['items']:
             if entry['authority-level'] != 'owner':
                 continue
             acct_data = entry['account']
-            acct = TradingAccount.from_dict(acct_data)
+            acct = TradingAccount.from_dict(acct_data, session)
             res.append(acct)
 
         return res
 
-    async def get_balance(session, account):
+    async def get_balance(self):
         """
         Get balance.
 
         Args:
-            session (TastyAPISession): An active and logged-in session object against which to query.
-            account (TradingAccount): The account_id to get balance on.
+            account (TradingAccount): The account to get balance on.
         Returns:
             dict: account attributes
         """
         url = '{}/accounts/{}/balances'.format(
-            session.API_url,
-            account.account_number
+            self.session.API_url,
+            self.account_number
         )
 
-        async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
+        async with aiohttp.request('GET', url, headers=self.session.get_request_headers()) as response:
             if response.status != 200:
-                raise Exception('Could not get trading account balance info from Tastyworks...')
+                raise Exception(f'HTTP {response.status} during GET balances from {self.account_number}')
             data = (await response.json())['data']
         return data
 
-    async def get_positions(session, account):
+    async def get_positions(self):
         """
         Get Open Positions.
 
         Args:
-            session (TastyAPISession): An active and logged-in session object against which to query.
-            account (TradingAccount): The account_id to get positions on.
+            account (TradingAccount): The account to get positions on.
         Returns:
             dict: account attributes
         """
         url = '{}/accounts/{}/positions'.format(
-            session.API_url,
-            account.account_number
+            self.session.API_url,
+            self.account_number
         )
 
-        async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
+        async with aiohttp.request('GET', url, headers=self.session.get_request_headers()) as response:
             if response.status != 200:
-                raise Exception('Could not get open positions info from Tastyworks...')
+                raise Exception(f'HTTP {response.status} during GET positions from {self.account_number}')
             data = (await response.json())['data']['items']
         return data
 
-    async def get_live_orders(session, account):
+    async def get_live_orders(self):
         """
-        Get live Orders.
+        Get live orders from the account
 
         Args:
-            session (TastyAPISession): An active and logged-in session object against which to query.
-            account (TradingAccount): The account_id to get live orders on.
+            None
         Returns:
             dict: account attributes
         """
         url = '{}/accounts/{}/orders/live'.format(
-            session.API_url,
-            account.account_number
+            self.session.API_url,
+            self.account_number
         )
 
-        async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
+        async with aiohttp.request('GET', url, headers=self.session.get_request_headers()) as response:
             if response.status != 200:
-                raise Exception('Could not get live orders info from Tastyworks...')
+                raise Exception(f'HTTP {response.status} during GET orders/live')
             data = (await response.json())['data']['items']
         return data
 
-    async def get_history(session, account):
+    async def get_history(self):
         """
-        Get live Orders.
+        Get transaction history from the account
 
         Args:
-            session (TastyAPISession): An active and logged-in session object against which to query.
-            account (TradingAccount): The account_id to get history on.
+            None
         Returns:
             dict: account attributes
         """
-        url = '{}/accounts/{}/transactions'.format(
-            session.API_url,
-            account.account_number
-        )
-
-        async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
-            if response.status != 200:
-                raise Exception('Could not get history info from Tastyworks...')
-            data = (await response.json())['data']
-        return data
+        total_pages = page = 0
+        history = []
+        while True:
+            url = '{}/accounts/{}/transactions?start-at=2020-01-01&end-at=2022-12-31&per-page=100&page-offset={}'.format(
+                self.session.API_url,
+                self.account_number,
+                page
+            )
+            async with aiohttp.request('GET', url, headers=self.session.get_request_headers()) as response:
+                if response.status != 200:
+                    raise Exception(f'HTTP {response.status} during GET transactions')
+                tmp = (await response.json())
+                if 'pagination' in tmp.keys():
+                    total_pages = tmp['pagination']['total-pages']
+                history.extend(tmp['data']['items'])
+            page += 1
+            if page == total_pages:
+                break
+        return history
 
 
 def _get_execute_order_json(order: Order):

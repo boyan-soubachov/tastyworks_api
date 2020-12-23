@@ -85,4 +85,7 @@ async def _get_tasty_option_chain_data(session, underlying) -> Dict:
         resp = await response.json()
 
         # NOTE: Have not seen an example with more than 1 item. No idea what that would be.
-        return resp['data']['items'][0]
+        if 'items' in resp['data'] and len(resp['data']['items']) > 0:
+            return resp['data']['items'][0]
+        else:
+            raise Exception(f'Empty option chain data for symbol {underlying.ticker}')
