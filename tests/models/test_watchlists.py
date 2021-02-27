@@ -1,4 +1,4 @@
-from tastyworks.models import watchlists
+from tastyworks.models.watchlists import WatchlistGroup
 from tastyworks.tastyworks_api import tasty_session
 import asyncio
 
@@ -17,6 +17,6 @@ class TestWatchlists(object):
         self.session = tasty_session.create_new_session(
             username, password
         )
-        self.wlg = asyncio.run(
-            watchlists.get_all_watchlists(self.session, public=public)
+        self.watchlists = asyncio.run(
+            WatchlistGroup.get_watchlists(self.session, public=public)  # NOQA: E501
         )

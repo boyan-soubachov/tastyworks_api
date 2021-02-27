@@ -24,7 +24,9 @@ async def symbol_search(symbol: str, session: TastyAPISession):
         'GET', url, headers=session.get_request_headers()
     ) as resp:
         if resp.status != 200:
-            raise Exception('Could not perform symbol search.')
+            raise Exception(
+                f'Status {resp.status}, message: {resp.json()["error"]["message"]}'  # NOQA: E501
+            )
         data = await resp.json()
 
     return data['data']['items']

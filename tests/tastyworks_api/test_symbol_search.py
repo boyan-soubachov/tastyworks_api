@@ -1,4 +1,4 @@
-from tastyworks.models.symbol_search import symbol_search
+from tastyworks.tastyworks_api.symbol_search import symbol_search
 from tastyworks.tastyworks_api import tasty_session
 import asyncio
 

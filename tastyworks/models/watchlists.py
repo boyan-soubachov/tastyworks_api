@@ -3,8 +3,11 @@ from tastyworks.models.session import TastyAPISession
 
 
 class Watchlist(object):
-    def __init__(self, name=None):
-        self.name = name
+    """Watchlist Class"""
+
+    def __init__(self):
+        """init"""
+        self.name = None
         self.group_name = None
         self.securities = {}
 
@@ -12,25 +15,28 @@ class Watchlist(object):
     def from_list(cls, data: list):
         """From List
 
-        Generator for making a watchlist.
+        Class Factory
 
         Notes:
             There is an instability issue with Tastyworks API.  Hence
-            the need to catch an exception.  Special symbols don't have
-            instrument-type's at all.
+            the need to catch an exceptions.  Special symbols don't have
+            instrument type's at all.
+
+            For stability & accessibility, all instrument type's are returned
+            as 'instrument_type'.
 
         Args:
             data (list):   List of dict objects containing symbol &
-                           [instrument-type | instrument_type] keys.
+                           instrument_type
 
         Returns:
-            Watchlist:  A watchlist object
+            Watchlist:  Instance of Watchlist()
         """
         inst = cls()
         for item in data:
             try:
                 inst.securities[item['symbol']] = {
-                    'instrument-type': item['instrument-type']
+                    'instrument_type': item['instrument-type']
                 }
             except KeyError:
                 try:
@@ -39,45 +45,71 @@ class Watchlist(object):
                     }
                 except KeyError:
                     inst.securities[item['symbol']] = {
-                        'instrument-type': None
+                        'instrument_type': None
                     }
         return inst
 
+    def __str__(self):
+        """String Representation"""
+        return str(self.__dict__)
+
 
 class WatchlistGroup(object):
-    """Watchlist Group
+    """WatchlistGroup Class"""
 
-    Generator for making document of watchlist objects.
-
-    Notes:
-        Not all watchlists return group-name key's.  Hence the need to catch
-        an exception.
-
-    Args:
-        session (TastyAPISession): Tastyworks API Session object
-        public (boolean): True if retrieving public-watchlists, false if
-                          retrieving custom-watchlists
-
-    Returns:
-        WatchlistGroup: A group of watchlists
-
-    """
     def __init__(self):
+        """init"""
         self.watchlists = {}
 
-    async def load_watchlists(
-        self, session: TastyAPISession, public: bool = True
+    def __iter__(self):
+        """Iterator"""
+        return iter(self.watchlists)
+
+    def __getitem__(self, item):
+        """Subscriptor"""
+        return self.watchlists[item]
+
+    def __repr__(self):
+        """Object Representation"""
+        return str(self.watchlists)
+
+    def __str__(self):
+        """String Representation"""
+        return str(list(self.watchlists.keys()))
+
+    @classmethod
+    async def get_watchlists(
+        cls, session: TastyAPISession, public: bool = True
     ):
+        """Get Watchlists
+
+        Class Factory
+
+        Retrieves a watchlist group (either public or private).
+
+        Notes:
+            Not all Watchlist's have group names.
+
+        Args:
+            session (TastyAPISession): A TastyAPISession object
+            public (bool): Retrive public or private watchlists
+
+        Returns:
+            WatchlistGroup: Instance of WatchlistGroup()
+        """
         url = f'{session.API_url}/public-watchlists' if public else f'{session.API_url}/watchlists'  # NOQA: E501
 
         async with aiohttp.request(
             'GET', url, headers=session.get_request_headers()
         ) as resp:
             if resp.status != 200:
-                raise Exception('Could not get public asset watchlists')
+                raise Exception(
+                    f'Status {resp.status}, message: {resp.json()["error"]["message"]}'  # NOQA: E501
+                )
             data = await resp.json()
 
         data = data['data']['items']
+        inst = cls()
         for entry in data:
             list_data = entry['watchlist-entries']
             wlist = Watchlist.from_list(list_data)
@@ -86,10 +118,6 @@ class WatchlistGroup(object):
                 wlist.group_name = entry['group-name']
             except KeyError:
                 pass
-            self.watchlists[wlist.name] = wlist
+            inst.watchlists[wlist.name] = wlist
 
-        return self
-
-
-def get_all_watchlists(session: TastyAPISession, public: bool = True):
-    return WatchlistGroup().load_watchlists(session, public=public)
+        return inst
