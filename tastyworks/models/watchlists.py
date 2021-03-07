@@ -97,14 +97,12 @@ class WatchlistGroup(object):
         Returns:
             WatchlistGroup: Instance of WatchlistGroup()
         """
-        url = f'{session.API_url}/public-watchlists' if public else f'{session.API_url}/watchlists'  # NOQA: E501
+        url = f'{session.API_url}/public-watchlists' if public else f'{session.API_url}/watchlists'
 
-        async with aiohttp.request(
-            'GET', url, headers=session.get_request_headers()
-        ) as resp:
+        async with aiohttp.request('GET', url, headers=session.get_request_headers()) as resp:
             if resp.status != 200:
                 raise Exception(
-                    f'Status {resp.status}, message: {resp.json()["error"]["message"]}'  # NOQA: E501
+                    f'Failed retrieving watchlists, Response status: {resp.status}; message: {resp.json()["error"]["message"]}'
                 )
             data = await resp.json()
 
