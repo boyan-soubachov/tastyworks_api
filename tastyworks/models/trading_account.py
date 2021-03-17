@@ -176,7 +176,7 @@ class TradingAccount(object):
             page_offset (int): Page # to start with
 
         Returns:
-            dict: Account transaction history
+            list: A list of transactions (dict)
         """
 
         total_pages = page = 0
