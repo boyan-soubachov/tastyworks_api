@@ -153,26 +153,71 @@ class TradingAccount(object):
             data = (await response.json())['data']['items']
         return data
 
-    async def get_history(self, session, account):
-        """
-        Get live Orders.
+    async def get_history(self, session, start_at: str = None, 
+        end_at: str = None, per_page: int = None, page_offset: int = 0
+    ):
+        """Get Transaction History
+
+        Warning for Windows users:
+            This will likely throw OSError: [WinError 10038] ...
+            It doesn't seem to effect the actual event loop, however, it is recommended that
+            you define the event loop policy for asyncio if you want to ensure quality before
+            retrieving the event loop.
+
+            Example:
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+            loop = asyncio.get_event_loop()
 
         Args:
             session (TastyAPISession): An active and logged-in session object against which to query.
-            account (TradingAccount): The account_id to get history on.
+            start_at (str): DD-MM-YYYY
+            end_at (str): DD-MM-YYYY
+            per_page (int): # of items for the API to return per page
+            page_offset (int): Page # to start with
+
         Returns:
-            dict: account attributes
+            list: A list of transactions (dict)
         """
+
+        total_pages = page = 0
+        history = []
+        params = {"page-offset": page_offset}
+
+        # Ensure we don't pass None to aiohttp.request
+        if start_at is not None:
+            params["start-at"] = start_at
+        if end_at is not None:
+            params["end-at"] = end_at
+        if per_page is not None:
+            params["per-page"] = per_page
+
         url = '{}/accounts/{}/transactions'.format(
             session.API_url,
-            account.account_number
+            self.account_number
         )
+        
 
-        async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
-            if response.status != 200:
-                raise Exception('Could not get history info from Tastyworks...')
-            data = (await response.json())['data']
-        return data
+        while params["page-offset"] <= total_pages:
+            url = '{}/accounts/{}/transactions'.format(
+                session.API_url,
+                self.account_number
+            )
+
+            async with aiohttp.request('GET', url, headers=session.get_request_headers(), params=params) as response:
+                if response.status != 200:
+                    raise Exception(
+                        f'Failed retrieving transaction history, Response status: {response.status}; message: {response.json()["error"]["message"]}'
+                    )
+
+                current_page = await response.json()
+                history.extend(current_page["data"]["items"])
+
+                if not total_pages and 'pagination' in current_page.keys():
+                    total_pages = current_page["pagination"]["total-pages"]
+
+            params["page-offset"] += 1
+
+        return history
 
 
 def _get_execute_order_json(order: Order):
