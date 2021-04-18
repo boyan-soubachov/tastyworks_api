@@ -94,15 +94,51 @@ class Order(Security):
     @classmethod
     def from_dict(cls, input_dict: dict):
         """
-        Parses an Order object from a dict.
+        Parses an Order object from an order dict.
+
+        ...as of 4/17/2021...
+        {
+        'id': abc,
+        'account-number':'abc123',
+        'time-in-force': 'GTC',
+        'order-type': 'Limit',
+        'size': 1,
+        'underlying-symbol': 'SPY',
+        'underlying-instrument-type': 'Equity',
+        'price': '0.94',
+        'price-effect': 'Debit',
+        'status': 'Received',
+        'cancellable': True,
+        'editable': True,
+        'edited': False,
+        'ext-exchange-order-number': '123',
+        'ext-client-order-id': '123',
+        'ext-global-order-number': 123,
+        'received-at': '2021-04-06T17:06:38.904+00:00',
+        'updated-at': 1618604409279,
+        'legs': [{
+                'instrument-type': 'Equity Option',
+                'symbol': 'SPY   210716P00320000',
+                'quantity': 1,
+                'remaining-quantity': 1,
+                'action': 'Buy to Close',
+                'fills': []
+                }]
+        }
         """
         details = OrderDetails(input_dict['underlying-symbol'])
+        details.id = input_dict.get('id')
+        details.account = input_dict.get('account-number')
+        details.time_in_force = input_dict.get('time-in-force')
+        details.type = OrderType(input_dict['order-type'])
+        details.size = input_dict.get('size')
+        details.underlying = input_dict.get('underlying-symbol')
         details.price = Decimal(input_dict['price']) if 'price' in input_dict else None
         details.price_effect = OrderPriceEffect(input_dict['price-effect'])
-        details.type = OrderType(input_dict['order-type'])
         details.status = OrderStatus(input_dict['status'])
-        details.time_in_force = input_dict['time-in-force']
+        details.received_at = datetime.strptime(input_dict.get('received-at'), '%Y-%m-%dT%H:%M:%S.%f%z')
         details.gtc_date = input_dict.get('gtc-date', None)
+        details.legs = input_dict.get('legs', None)
         return cls(order_details=details)
 
     @classmethod
