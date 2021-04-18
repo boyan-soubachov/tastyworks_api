@@ -1,9 +1,12 @@
 from typing import List
 
+import logging
 import aiohttp
 from dataclasses import dataclass
 
 from tastyworks.models.order import Order, OrderPriceEffect
+
+LOGGER = logging.getLogger(__name__)
 
 
 @dataclass
@@ -74,6 +77,7 @@ class TradingAccount(object):
             list (TradingAccount): A list of trading accounts.
         """
         url = f'{session.API_url}/customers/me/accounts'
+        LOGGER.info(f'Fetching accounts at {url}')
         res = []
 
         async with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:

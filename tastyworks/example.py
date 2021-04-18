@@ -7,8 +7,7 @@ from decimal import Decimal
 
 from tastyworks.models import option_chain, underlying
 from tastyworks.models.option import Option, OptionType
-from tastyworks.models.order import (Order, OrderDetails, OrderPriceEffect,
-                                     OrderType)
+from tastyworks.models.order import (Order, OrderDetails, OrderPriceEffect, OrderType)
 from tastyworks.models.session import TastyAPISession
 from tastyworks.models.trading_account import TradingAccount
 from tastyworks.models.underlying import UnderlyingType
@@ -26,42 +25,47 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
     #     ]
     # }
     sub_values = {
-        "Quote": ["/ES"]
+        "Quote": ["SPY"]
     }
 
+    # Get accounts
     accounts = await TradingAccount.get_remote_accounts(session)
-    acct = accounts[0]
+    acct = accounts[1]
     LOGGER.info('Accounts available: %s', accounts)
 
+    # Get open orders
     orders = await Order.get_remote_orders(session, acct)
     LOGGER.info('Number of active orders: %s', len(orders))
 
-    # Execute an order
+    # List all the open orders
+    for order in orders:
+        print(order.details)
 
-    details = OrderDetails(
-        type=OrderType.LIMIT,
-        price=Decimal(400),
-        price_effect=OrderPriceEffect.CREDIT)
-    new_order = Order(details)
+    # # Execute an order
+    # details = OrderDetails(
+    #     type=OrderType.LIMIT,
+    #     price=Decimal(400),
+    #     price_effect=OrderPriceEffect.CREDIT)
+    # new_order = Order(details)
+    #
+    # opt = Option(
+    #     ticker='AKS',
+    #     quantity=1,
+    #     expiry=get_third_friday(date.today()),
+    #     strike=Decimal(3),
+    #     option_type=OptionType.CALL,
+    #     underlying_type=UnderlyingType.EQUITY
+    # )
+    # new_order.add_leg(opt)
+    #
+    # res = await acct.execute_order(new_order, session, dry_run=True)
+    # LOGGER.info('Order executed successfully: %s', res)
 
-    opt = Option(
-        ticker='AKS',
-        quantity=1,
-        expiry=get_third_friday(date.today()),
-        strike=Decimal(3),
-        option_type=OptionType.CALL,
-        underlying_type=UnderlyingType.EQUITY
-    )
-    new_order.add_leg(opt)
-
-    res = await acct.execute_order(new_order, session, dry_run=True)
-    LOGGER.info('Order executed successfully: %s', res)
-
-    # Get an options chain
-    undl = underlying.Underlying('AKS')
-
-    chain = await option_chain.get_option_chain(session, undl)
-    LOGGER.info('Chain strikes: %s', chain.get_all_strikes())
+    # # Get an options chain
+    # undl = underlying.Underlying('AKS')
+    #
+    # chain = await option_chain.get_option_chain(session, undl)
+    # LOGGER.info('Chain strikes: %s', chain.get_all_strikes())
 
     await streamer.add_data_sub(sub_values)
 
@@ -83,13 +87,28 @@ def get_third_friday(d):
 
 
 def main():
+    """
+    1. Get API auth token (Session) using Username & Password at 'https://api.tastyworks.com/sessions'
+    2. Get a Streamer auth token with the API auth token at 'https://tasty-live-web.dxfeed.com/live'
+    """
+    # # Creating a new session fetching username and password in environment variable
+    # # Username and Password should be set in permanent environment variables
+    # print(environ.get('TW_USER', ""))
+    # print(environ.get('TW_PASSWORD', ""))
+
+    # /tastyworks/tastyworks_api/tasty_session.py
+    LOGGER.info('Creating the API session...')
     tasty_client = tasty_session.create_new_session(environ.get('TW_USER', ""), environ.get('TW_PASSWORD', ""))
 
+    # /tastyworks/streamer.py
+    LOGGER.info('Creating DataStreamer session...')
     streamer = DataStreamer(tasty_client)
     LOGGER.info('Streamer token: %s' % streamer.get_streamer_token())
+
     loop = asyncio.get_event_loop()
 
     try:
+        # Start main_loop()
         loop.run_until_complete(main_loop(tasty_client, streamer))
     except Exception:
         LOGGER.exception('Exception in main loop')

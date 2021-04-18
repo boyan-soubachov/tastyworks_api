@@ -13,13 +13,21 @@ from tastyworks.models.session import TastyAPISession
 LOGGER = logging.getLogger(__name__)
 
 
+# the class inherits the base class called "object"
 class DataStreamer(object):
+    """
+    DataStreamer object
+    Input parameter is an open API Session <tastyworks.models.session.TastyAPISession> object
+    """
+
+    # The init method is used to pass arguments to a class at creation
     def __init__(self, session: TastyAPISession):
         if not session.is_active():
             raise Exception('TastyWorks API session not active/valid')
         self.tasty_session = session
         self.cometd_client = None
         self.subs = {}
+        LOGGER.info('Setting up the streamer connection...')
         asyncio.get_event_loop().run_until_complete(
             self._setup_connection()
         )
@@ -47,11 +55,11 @@ class DataStreamer(object):
     async def _send_msg(self, channel, message):
         if not self.logged_in:
             raise Exception('Connection not made or logged in')
-        LOGGER.debug('[dxFeed] sending: %s on channel: %s', message, channel)
+        LOGGER.info('[dxFeed] sending: %s on channel: %s', message, channel)
         await self.cometd_client.publish(channel, message)
 
     async def reset_data_subs(self):
-        LOGGER.debug('Resetting data subscriptions')
+        LOGGER.info('Resetting data subscriptions')
         await self._send_msg(dxfeed.SUBSCRIPTION_CHANNEL, {'reset': True})
 
     def get_streamer_token(self):
@@ -70,6 +78,7 @@ class DataStreamer(object):
                 resp.json()['error']['message']
             ))
         self.streamer_data = resp.json()
+        LOGGER.info(f'Received streamer data:\n- Streamer Token: {self.streamer_data["data"]["token"]}\n- Streamer URL: {self.streamer_data["data"]["streamer-url"]}\n- Websocket URL: {self.streamer_data["data"]["websocket-url"]}')
         self.streamer_data_created = datetime.datetime.now()
         return resp.json()
 
@@ -99,7 +108,7 @@ class DataStreamer(object):
 
     async def listen(self):
         async for msg in self.cometd_client:
-            LOGGER.debug('[dxFeed] received: %s', msg)
+            LOGGER.info('[dxFeed] received: %s', msg)
             if msg['channel'] != dxfeed.DATA_CHANNEL:
                 continue
             yield await self._consumer(msg['data'])
@@ -108,6 +117,7 @@ class DataStreamer(object):
 class AuthExtension(aiocometd.AuthExtension):
     def __init__(self, streamer_token: str):
         self.streamer_token = streamer_token
+        LOGGER.info('Doing auth extension with streamer token: %s', self.streamer_token)
 
     def _get_login_msg(self):
         return {'ext': {'com.devexperts.auth.AuthToken': f'{self.streamer_token}'}}
@@ -119,10 +129,12 @@ class AuthExtension(aiocometd.AuthExtension):
         }
 
     async def incoming(self, payload, headers=None):
+        LOGGER.info(f'Payload incoming: {payload}')
         pass
 
     async def outgoing(self, payload, headers=None):
         for entry in payload:
+            LOGGER.info(f'Payload outgoing: {payload}')
             if 'clientId' not in entry:
                 entry.update(self._get_login_msg())
 
