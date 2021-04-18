@@ -42,7 +42,6 @@ class TimeInForce(Enum):
 
 @dataclass
 class OrderDetails(object):
-    """Class for storing an order details."""
     type: OrderType = None
     time_in_force: TimeInForce = TimeInForce.DAY
     gtc_date: datetime = None
