@@ -139,6 +139,7 @@ class Order(Security):
         details.received_at = datetime.strptime(input_dict.get('received-at'), '%Y-%m-%dT%H:%M:%S.%f%z')
         details.gtc_date = input_dict.get('gtc-date', None)
         details.legs = input_dict.get('legs', None)
+        # TODO: Create a OrderLeg class to hold an order leg
         return cls(order_details=details)
 
     @classmethod

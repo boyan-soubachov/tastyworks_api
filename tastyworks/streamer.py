@@ -18,6 +18,11 @@ class DataStreamer(object):
     """
     DataStreamer object
     Input parameter is an open API Session <tastyworks.models.session.TastyAPISession> object
+
+    https://tasty-live-web.dxfeed.com/live/rest-demo.jsp
+    https://github.com/dxFeed/dxfeed-python-api
+    https://dxfeed.readthedocs.io/en/latest/basic_usage.html
+    https://www.dxfeed.com/api/python-and-r-apis/
     """
 
     # The init method is used to pass arguments to a class at creation
@@ -41,7 +46,7 @@ class DataStreamer(object):
         await self.cometd_client.close()
 
     async def add_data_sub(self, values):
-        LOGGER.debug(f'Adding subscription: {values}')
+        LOGGER.info(f'Adding subscription: {values}')
         await self._send_msg(dxfeed.SUBSCRIPTION_CHANNEL, {'add': values})
 
     async def remove_data_sub(self, values):
