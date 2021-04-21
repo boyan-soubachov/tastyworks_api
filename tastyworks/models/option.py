@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 from tastyworks.models.security import Security
 from tastyworks.models.underlying import UnderlyingType
+from tastyworks.models.greeks import Greeks
 
 
 class OptionType(Enum):
@@ -13,14 +14,32 @@ class OptionType(Enum):
     CALL = 'C'
 
 
+class ExpirationType(Enum):
+    WEEKLY = 'Weekly'
+    REGULAR = 'Regular'
+    QUARTERLY = 'Quarterly'
+
+
+class SettlementType(Enum):
+    AM = 'AM'
+    PM = 'PM'
+
+
 @dataclass
 class Option(Security):
+    symbol: str
     ticker: str
-    expiry: date
+    expiration_date: date
+    dte: int
     strike: Decimal
     option_type: OptionType
     underlying_type: UnderlyingType
-    quantity: int = 1
+    shares_per_contract: int
+    expiration_type: str
+    settlement_type: str
+    greeks: Greeks
+    # quote: Quote
+    #quantity: int = 1
 
     def _get_underlying_type_string(self, underlying_type: UnderlyingType):
         if underlying_type == UnderlyingType.EQUITY:
@@ -33,7 +52,7 @@ class Option(Security):
 
         res = '{ticker}{exp_date}{type}{strike_int}{strike_dec}'.format(
             ticker=self.ticker[0:6].ljust(6),
-            exp_date=self.expiry.strftime('%y%m%d'),
+            exp_date=self.expiration_date.strftime('%y%m%d'),
             type=self.option_type.value,
             strike_int=str(strike_int).zfill(5),
             strike_dec=str(strike_dec).zfill(3)
@@ -50,10 +69,11 @@ class Option(Security):
 
         res = '.{ticker}{exp_date}{type}{strike}'.format(
             ticker=self.ticker,
-            exp_date=self.expiry.strftime('%y%m%d'),
+            exp_date=self.expiration_date.strftime('%y%m%d'),
             type=self.option_type.value,
             strike=strike_str
         )
+        self.symbol = res
         return res
 
     def to_tasty_json(self):
