@@ -9,13 +9,13 @@ class TestOptionChain(unittest.TestCase):
     def setUp(self):
         options = [option.Option(
             ticker='AKS',
-            expiry=date(2018, 1, 21),
+            expiration_date=date(2018, 1, 21),
             strike=Decimal('3.5'),
             option_type=option.OptionType.PUT,
             underlying_type=underlying.UnderlyingType.EQUITY
         ), option.Option(
             ticker='AKS',
-            expiry=date(2018, 2, 21),
+            expiration_date=date(2018, 2, 21),
             strike=Decimal(4),
             option_type=option.OptionType.PUT,
             underlying_type=underlying.UnderlyingType.EQUITY
@@ -34,7 +34,7 @@ class TestOptionChain(unittest.TestCase):
     def test_get_all_strikes_no_duplicates(self):
         self.option_chain.options.append(option.Option(
             ticker='AKS',
-            expiry=date(2018, 4, 21),
+            expiration_date=date(2018, 4, 21),
             strike=Decimal('3.5'),
             option_type=option.OptionType.PUT,
             underlying_type=underlying.UnderlyingType.EQUITY
@@ -51,7 +51,7 @@ class TestOptionChain(unittest.TestCase):
     def test_get_all_expirations_no_duplicates(self):
         self.option_chain.options.append(option.Option(
             ticker='AKS',
-            expiry=date(2018, 2, 21),
+            expiration_date=date(2018, 2, 21),
             strike=Decimal('3.5'),
             option_type=option.OptionType.PUT,
             underlying_type=underlying.UnderlyingType.EQUITY
