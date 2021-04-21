@@ -6,6 +6,7 @@ REQUIRES = [
     'aiohttp<4',
     'dataclasses',
     'requests<3',
+    'pandas',
 ]
 
 TEST_REQUIRES = [

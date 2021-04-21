@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal
+# from tastyworks.models.option import Option
 
 # [{'eventSymbol': '.SPY210419P410',
 #   'eventTime': 0,
@@ -34,7 +35,7 @@ class Greeks(object):
             sub_greeks = {"Greeks": [".SPY210419P410"]}
             await streamer.add_data_sub(sub_greeks)
         Args:
-            input_dict: dictionary containing the greeks data
+            input_dict: dictionary containing the greeks data for one options symbol
         """
         self.symbol = input_dict['eventSymbol']
         self.price = input_dict['price']
