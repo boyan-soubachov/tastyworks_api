@@ -168,10 +168,10 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
             break  # Stops the async for item in streamer.listen() loop after receiving all the data
 
     for data in greeks_data:
-        LOGGER.info('Symbol: {}\tPrice: {}\tDelta {}'.format(data['eventSymbol'], data['price'], data['delta']))
         gd = Greeks(data)
         idx_match = [x for x in range(options.__len__()) if options[x].symbol == gd.symbol][0]
         options[idx_match].greeks = gd
+        LOGGER.info('> Symbol: {}\tPrice: {}\tDelta {}'.format(gd.symbol, gd.price, gd.delta))
 
     # # Execute an order
     # details = OrderDetails(

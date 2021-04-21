@@ -39,7 +39,7 @@ class Option(Security):
     settlement_type: str
     greeks: Greeks
     # quote: Quote
-    #quantity: int = 1
+    quantity: int = 1
 
     def _get_underlying_type_string(self, underlying_type: UnderlyingType):
         if underlying_type == UnderlyingType.EQUITY:

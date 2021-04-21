@@ -96,7 +96,7 @@ async def get_option_chain(session, underlying: Underlying, expiration: date = N
                     shares_per_contract=data['shares-per-contract'],
                     expiration_type=exp['expiration-type'],
                     settlement_type=exp['settlement-type'],
-                    greeks=[]
+                    greeks=Greeks
                 )
                 res.append(new_option)
     return OptionChain(res)
