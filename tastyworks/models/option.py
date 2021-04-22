@@ -37,7 +37,7 @@ class Option(Security):
     shares_per_contract: int
     expiration_type: str
     settlement_type: str
-    greeks: Greeks
+    greeks: Greeks()
     # quote: Quote
     quantity: int = 1
 

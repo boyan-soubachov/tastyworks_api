@@ -19,17 +19,23 @@ from decimal import Decimal
 
 @dataclass
 class Greeks(object):
-    symbol: str
-    # time: datetime
-    price: Decimal
-    volatility: Decimal
-    delta: Decimal
-    gamma: Decimal
-    theta: Decimal
-    rho: Decimal
-    vega: Decimal
+    symbol: str = ''
+    # date: datetime
+    price: Decimal = 0
+    volatility: Decimal = 0
+    delta: Decimal = 0
+    gamma: Decimal = 0
+    theta: Decimal = 0
+    rho: Decimal = 0
+    vega: Decimal = 0
 
-    def __init__(self, input_dict: dict):
+    # def __init__(self, input_dict: dict):
+    #     if input_dict is not None:
+    #         self.from_dict(input_dict)
+    #     else:
+    #         pass
+
+    def from_dict(self, input_dict: dict):
         """
         imports the Greeks data from a dictionary pulled from subscribed data
             sub_greeks = {"Greeks": [".SPY210419P410"]}
