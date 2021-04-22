@@ -27,19 +27,19 @@ class SettlementType(Enum):
 
 @dataclass
 class Option(Security):
-    symbol: str
     ticker: str
     expiration_date: date
-    dte: int
     strike: Decimal
     option_type: OptionType
     underlying_type: UnderlyingType
-    shares_per_contract: int
-    expiration_type: str
-    settlement_type: str
-    greeks: Greeks()
     # quote: Quote
+    dte: int = 0
     quantity: int = 1
+    symbol: str = ''
+    expiration_type: str = None
+    settlement_type: str = None
+    shares_per_contract: int = None
+    greeks: Greeks() = None
 
     def _get_underlying_type_string(self, underlying_type: UnderlyingType):
         if underlying_type == UnderlyingType.EQUITY:

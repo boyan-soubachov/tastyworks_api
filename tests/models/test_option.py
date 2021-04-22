@@ -4,27 +4,18 @@ from decimal import Decimal
 
 from tastyworks.models.option import Option, OptionType
 from tastyworks.models.underlying import UnderlyingType
-from tastyworks.models.greeks import Greeks
 
 
 class TestOptionModel(unittest.TestCase):
     def setUp(self):
         self.test_option = Option(
-            symbol='',
             ticker='AKS',
+            quantity=1,
             expiration_date=date(2018, 8, 10),
-            dte=1,
             strike=Decimal('3.5'),
             option_type=OptionType.CALL,
-            underlying_type=UnderlyingType.EQUITY,
-            shares_per_contract=100,
-            expiration_type='Weekly',
-            settlement_type='PM',
-            greeks=Greeks(),
-            # quote: Quote
-            quantity=1
+            underlying_type=UnderlyingType.EQUITY
         )
-        print(self.test_option)
 
     def test_occ2010_integer_strike(self):
         self.test_option.strike = 3
