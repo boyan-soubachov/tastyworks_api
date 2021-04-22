@@ -19,15 +19,15 @@ from decimal import Decimal
 
 @dataclass
 class Greeks(object):
-    symbol: str = ''
+    symbol: str = None
     # date: datetime
-    price: Decimal = 0
-    volatility: Decimal = 0
-    delta: Decimal = 0
-    gamma: Decimal = 0
-    theta: Decimal = 0
-    rho: Decimal = 0
-    vega: Decimal = 0
+    price: Decimal = None
+    volatility: Decimal = None
+    delta: Decimal = None
+    gamma: Decimal = None
+    theta: Decimal = None
+    rho: Decimal = None
+    vega: Decimal = None
 
     # def __init__(self, input_dict: dict):
     #     if input_dict is not None:

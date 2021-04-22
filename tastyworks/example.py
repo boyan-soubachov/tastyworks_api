@@ -100,7 +100,7 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
                 await asyncio.sleep(1)
                 print('continuing...')
                 break
-        if quotes.__len__() >= 30:
+        if quotes.__len__() >= 10:
             await streamer.reset_data_subs()
             break
 
@@ -168,7 +168,8 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
             break  # Stops the async for item in streamer.listen() loop after receiving all the data
 
     for data in greeks_data:
-        gd = Greeks(data)
+        gd = Greeks()
+        gd.from_dict(data)
         idx_match = [x for x in range(options.__len__()) if options[x].symbol == gd.symbol][0]
         options[idx_match].greeks = gd
         LOGGER.info('> Symbol: {}\tPrice: {}\tDelta {}'.format(gd.symbol, gd.price, gd.delta))
@@ -232,13 +233,13 @@ def main():
         loop.run_until_complete(main_loop(tasty_client, streamer))
     except Exception:
         LOGGER.exception('Exception in main loop')
-    # finally:
-    #     # find all futures/tasks still running and wait for them to finish
-    #     pending_tasks = [
-    #         task for task in asyncio.all_tasks() if not task.done()
-    #     ]
-    #     loop.run_until_complete(asyncio.gather(*pending_tasks))
-    #     loop.close()
+    finally:
+        # find all futures/tasks still running and wait for them to finish
+        pending_tasks = [
+            task for task in asyncio.all_tasks() if not task.done()
+        ]
+        loop.run_until_complete(asyncio.gather(*pending_tasks))
+        loop.close()
 
 
 if __name__ == '__main__':
