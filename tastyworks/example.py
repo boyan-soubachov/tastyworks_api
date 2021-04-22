@@ -74,7 +74,7 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
               f"Ask: {quotes[qd.symbol][list(quotes[qd.symbol].keys())[-1]].ask_price}")
     print("--------------")
 
-    # Example to keep collection quotes evey 1 second until we have 10 data points
+    # Example to keep collection quotes every 1 second until we have 10 data points
     # Kind of a hack of the streamer as it stops streaming during off hours it seems (but can get 1 set of values)
     # Storing in pandas dataframe for simplicity
     quotes = pd.DataFrame()
