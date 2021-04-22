@@ -24,21 +24,27 @@ LOGGER = logging.getLogger(__name__)
 
 async def main_loop(session: TastyAPISession, streamer: DataStreamer):
 
-    # OPEN ORDERS
-    # # Get accounts
-    # accounts = await TradingAccount.get_remote_accounts(session)
-    # acct = accounts[1]
-    # LOGGER.info('Accounts available: %s', accounts)
+    ###############
+    # OPEN ORDERS #
+    ###############
+    # Get accounts
+    print("--------------")
+    accounts = await TradingAccount.get_remote_accounts(session)
+    LOGGER.info('Accounts available: %s', accounts)
+    print("--------------")
 
-    # # Get open orders
-    # orders = await Order.get_remote_orders(session, acct)
-    # LOGGER.info('Number of active orders: %s', len(orders))
-    #
-    # # List all the open orders
-    # for order in orders:
-    #     print(order.details)
+    # Get & list all open orders
+    acct = accounts[0]
+    orders = await Order.get_remote_orders(session, acct)
+    print("--------------")
+    LOGGER.info('Number of active orders: %s', len(orders))
+    for order in orders:
+        print(order.details)
+    print("--------------")
 
-    # EQUITIES
+    ############
+    # EQUITIES #
+    ############
     # Get quotes of equities
     symbols = ["SPY", "AAPL", "SPX"]
     streamer_list = {"Quote": symbols}
@@ -61,13 +67,18 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
         print(f"Ticker: {qd.symbol}, Bid: {qd.bid_price}, Ask: {qd.ask_price}")
     print("--------------")
 
-    # Storing in a dictionary nested with datetime string instead for maybe easier access
+    # Storing in a dictionary nested with datetime string instead
+    # Not a great way to store data, see below for using a numpy data table instead
     print("--------------")
-    quotes = dict.fromkeys(symbols, dict())
+    from collections import defaultdict
+    def ndefaultdict(): return defaultdict(ndefaultdict)
+    quotes = defaultdict(ndefaultdict)
+    # quotes = dict.fromkeys(symbols, {})
     for data in streamer_data:
-        now_str = datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
-        qd = Quote(data)
-        quotes[qd.symbol][now_str] = qd
+        qd = Quote()
+        qd.from_dict(data)
+        qd_datetime = qd.datetime.strftime("%Y-%m-%d-%H-%M-%S-%f")
+        quotes[qd.symbol][qd_datetime] = qd
         print(f"Ticker: {qd.symbol}, "
               f"Date & Time: {list(quotes[qd.symbol].keys())[-1]}, "
               f"Bid: {quotes[qd.symbol][list(quotes[qd.symbol].keys())[-1]].bid_price}, "
@@ -75,7 +86,7 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
     print("--------------")
 
     # Example to keep collection quotes every 1 second until we have 10 data points
-    # Kind of a hack of the streamer as it stops streaming during off hours it seems (but can get 1 set of values)
+    # Using 'while 1' as it stops streaming during off hours it seems (but can get 1 set of values)
     # Storing in pandas dataframe for simplicity
     quotes = pd.DataFrame()
     while 1:
@@ -104,7 +115,9 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
             await streamer.reset_data_subs()
             break
 
-    # # OPTIONS
+    ###########
+    # OPTIONS #
+    ###########
     # Get an options chain for an underlying
     undl = underlying.Underlying('SPY')
     chain = await option_chain.get_option_chain(session, undl)

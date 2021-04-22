@@ -32,14 +32,14 @@ from datetime import datetime
 
 @dataclass
 class Quote(object):
-    symbol: str
-    bid_price: Decimal
-    ask_price: Decimal
-    bid_size: Decimal
-    ask_size: Decimal
-    datetime: datetime
+    symbol: str = None
+    bid_price: Decimal = None
+    ask_price: Decimal = None
+    bid_size: Decimal = None
+    ask_size: Decimal = None
+    datetime: datetime = None
 
-    def __init__(self, input_dict: dict):
+    def from_dict(self, input_dict: dict):
         """
         Store the Quote data from a dictionary pulled from subscribed data
             sub_values = {"Quote": ["SPY"]}
