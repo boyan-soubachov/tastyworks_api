@@ -70,10 +70,7 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
     # Storing in a dictionary nested with datetime string instead
     # Not a great way to store data, see below for using a numpy data table instead
     print("--------------")
-    from collections import defaultdict
-    def ndefaultdict(): return defaultdict(ndefaultdict)
-    quotes = defaultdict(ndefaultdict)
-    # quotes = dict.fromkeys(symbols, {})
+    quotes = {s: {} for s in symbols}
     for data in streamer_data:
         qd = Quote()
         qd.from_dict(data)
@@ -187,25 +184,29 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
         options[idx_match].greeks = gd
         LOGGER.info('> Symbol: {}\tPrice: {}\tDelta {}'.format(gd.symbol, gd.price, gd.delta))
 
-    # # Execute an order
-    # details = OrderDetails(
-    #     type=OrderType.LIMIT,
-    #     price=Decimal(400),
-    #     price_effect=OrderPriceEffect.CREDIT)
-    # new_order = Order(details)
+    ##########
+    # ORDERS #
+    ##########
+    # Execute an order
+    details = OrderDetails(
+        type=OrderType.LIMIT,
+        price=Decimal(400),
+        price_effect=OrderPriceEffect.CREDIT)
+    new_order = Order(details)
 
-    # opt = Option(
-    #     ticker='AKS',
-    #     quantity=1,
-    #     expiration_date=get_third_friday(date.today()),
-    #     strike=Decimal(3),
-    #     option_type=OptionType.CALL,
-    #     underlying_type=UnderlyingType.EQUITY
-    # )
-    # new_order.add_leg(opt)
-    #
-    # res = await acct.execute_order(new_order, session, dry_run=True)
-    # LOGGER.info('Order executed successfully: %s', res)
+    opt = Option(
+        ticker='GME',
+        quantity=1,
+        expiration_date=get_third_friday(date.today()),
+        strike=Decimal(10),
+        option_type=OptionType.PUT,
+        underlying_type=UnderlyingType.EQUITY
+    )
+    new_order.add_leg(opt)
+
+    res = await acct.execute_order(new_order, session, dry_run=True)
+    LOGGER.info('Order executed successfully: %s', res)
+
 
 def get_third_friday(d):
     s = date(d.year, d.month, 15)
@@ -227,8 +228,6 @@ def main():
     """
     # # Creating a new session fetching username and password in environment variable
     # # Username and Password should be set in permanent environment variables
-    # print(environ.get('TW_USER', ""))
-    # print(environ.get('TW_PASSWORD', ""))
 
     # /tastyworks/tastyworks_api/tasty_session.py
     LOGGER.info('Creating the API session...')
@@ -248,10 +247,11 @@ def main():
         LOGGER.exception('Exception in main loop')
     finally:
         # find all futures/tasks still running and wait for them to finish
-        pending_tasks = [
-            task for task in asyncio.all_tasks() if not task.done()
-        ]
-        loop.run_until_complete(asyncio.gather(*pending_tasks))
+        if loop.is_running():
+            pending_tasks = [
+                task for task in asyncio.all_tasks() if not task.done()
+            ]
+            loop.run_until_complete(asyncio.gather(*pending_tasks))
         loop.close()
 
 

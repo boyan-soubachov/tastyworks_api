@@ -55,3 +55,56 @@ class MappedItem(object):
         if data:
             self.data = self._map_data(data)
         self.keys = None
+
+
+'''
+  POPULAR_INDICES_MAPPING = {
+    SPX: '$SPX',
+    SPXW: '$SPX',
+    SPXPM: '$SPXPM',
+    VIX: '$VIX',
+    VIXW: '$VIX',
+    MNX: '$MNX.X',
+    OEX: '$OEX.X',
+    DJX: '$DJX.X',
+    DJI: '$DJX.X',
+    RUT: '$RUT'
+  };
+
+  XCBT = 'XCBT';
+  XCME = 'XCME';
+  XNYM = 'XNYM';
+  XCEC = 'XCEC';
+  XCBF = 'XCBF';
+
+  FUTURES_EXCHANGE_MAPPING = {
+    '/ZB': XCBT,
+    '/ZN': XCBT,
+    '/ZF': XCBT,
+    '/ZT': XCBT,
+    '/UB': XCBT,
+    '/GE': XCME,
+    '/6A': XCME,
+    '/6B': XCME,
+    '/6C': XCME,
+    '/6E': XCME,
+    '/6J': XCME,
+    '/6M': XCME,
+    '/ZC': XCBT,
+    '/ZS': XCBT,
+    '/ZW': XCBT,
+    '/HE': XCBT,
+    '/CL': XNYM,
+    '/NG': XNYM,
+    '/GC': XCEC,
+    '/SI': XCEC,
+    '/HG': XCEC,
+    '/ES': XCME,
+    '/NQ': XCME,
+    '/YM': XCBT,
+    '/RTY': XCME,
+    '/VX': XCBF,
+    '/VXM': XCBF,
+    '/BTC': XCME
+  };
+  '''
