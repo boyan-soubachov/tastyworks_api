@@ -29,12 +29,6 @@ class Greeks(object):
     rho: Decimal = None
     vega: Decimal = None
 
-    # def __init__(self, input_dict: dict):
-    #     if input_dict is not None:
-    #         self.from_dict(input_dict)
-    #     else:
-    #         pass
-
     def from_dict(self, input_dict: dict):
         """
         imports the Greeks data from a dictionary pulled from subscribed data
