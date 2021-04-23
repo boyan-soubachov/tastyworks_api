@@ -5,6 +5,8 @@ from tastyworks.models.security import Security
 
 class UnderlyingType(Enum):
     EQUITY = 'Equity'
+    FUTURE = 'Future'
+    WARRANT = 'Warrant'
 
 
 class Underlying(Security):
