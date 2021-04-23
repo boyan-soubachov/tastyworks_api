@@ -8,6 +8,7 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+tastyworks/documentation
 .Python
 build/
 develop-eggs/
