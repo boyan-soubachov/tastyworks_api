@@ -18,7 +18,7 @@ def build_default_order(time_in_force=order.TimeInForce.DAY):
     order_details.legs = [
         option.Option(
             ticker='AKS',
-            expiration_date=datetime.date(2018, 8, 31),
+            expiry=datetime.date(2018, 8, 31),
             strike=Decimal('3.5'),
             option_type=option.OptionType.CALL,
             underlying_type=underlying.UnderlyingType.EQUITY,

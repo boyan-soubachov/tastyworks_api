@@ -11,7 +11,7 @@ class TestOptionModel(unittest.TestCase):
         self.test_option = Option(
             ticker='AKS',
             quantity=1,
-            expiration_date=date(2018, 8, 10),
+            expiry=date(2018, 8, 10),
             strike=Decimal('3.5'),
             option_type=OptionType.CALL,
             underlying_type=UnderlyingType.EQUITY
