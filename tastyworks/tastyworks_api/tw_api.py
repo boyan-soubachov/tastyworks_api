@@ -10,7 +10,7 @@ from typing import Dict
 async def is_error(resp, valid_list: list = None, error_list: list = None):
     # TODO: Improve to capture errors? Can use the 'ok' data of resp
     if valid_list is None:
-        valid_list = [200, 201, 202]
+        valid_list = [200, 201, 202, 204]
     if error_list is None:
         error_list = []
 
@@ -46,6 +46,7 @@ def make_api_url(key: str, **kwargs):
     tag = kwargs.get('tag')
     order_id = kwargs.get('order_id')
     entry_id = kwargs.get('entry_id')
+    alert_id = kwargs.get('alert_id')
     journal_page_offset = kwargs.get('journal_page_offset')
     watchlist_name = kwargs.get('watchlist_name')
     per_page = kwargs.get('per_page')
@@ -97,21 +98,24 @@ def make_api_url(key: str, **kwargs):
         'ORDER_EXECUTE': f'/accounts/{account}/orders{"/"+order_id if order_id else ""}',
         'FIFTY_POP': '/fifty-percent-pop',
 
-        'SYMBOL_SEARCH': f'/symbols/search/{quote(symbol if symbol else "", safe="")}',  # TODO
-        'MARKET_METRICS': f'/market-metrics?symbols={symbol}',  # TODO
-        'OPTION_CHAINS': f'/option-chains/{symbol}/nested',  # TODO
-        'FUTURE_OPTION_CHAINS': f'/futures-option-chains/{(symbol if symbol else "").strip("/")}/nested',  # TODO
+        'SYMBOL_SEARCH': f'/symbols/search/{quote(symbol if symbol else "", safe="")}',
+        'MARKET_METRICS': f'/market-metrics?symbols={symbol}',
+        'OPTION_CHAINS': f'/option-chains/{symbol}/nested',
+        'FUTURE_OPTION_CHAINS': f'/futures-option-chains/{(symbol if symbol else "").strip("/")}/nested',
+
+        'QUOTE_ALERTS': f'/quote-alerts{"/"+alert_id if alert_id else ""}',
 
         'WATCHLISTS': f'/watchlists{"/"+watchlist_name if watchlist_name else ""}',
         'WATCHLISTS_PUBLIC': '/public-watchlists',
 
-        'INST_FUTURES': '/instruments/futures',
-        'PRECISIONS': '/instruments/quantity-decimal-precisions',
         'JOURNAL': f'/journal-entries'
                    f'{"/"+entry_id if entry_id else ""}'  # Used for modifying or deleting an entry
                    f'{"?page-offset="+journal_page_offset if journal_page_offset else ""}'
                    f'{"&" if journal_page_offset else "?"}'
-                   f'{"tag="+tag if tag else ""}'  # Used to search for an entry by tag
+                   f'{"tag="+tag if tag else ""}',  # Used to search for an entry by tag
+        
+        'INST_FUTURES': '/instruments/futures',
+        'PRECISIONS': '/instruments/quantity-decimal-precisions'
     }
 
     url = root + crumbs.get(key)
@@ -143,7 +147,7 @@ async def api_request(request_type: str, url: str, token: str = None, json_data:
         await is_error(resp)
         if resp:
             api_response = {
-                'content': 'OK' if (resp.status == 202) else await resp.json(),  # 202 not returning any data
+                'content': 'OK' if (resp.status in [202, 204]) else await resp.json(),  # 202/204 not returning any data
                 'ok': resp.ok,
                 'status': resp.status,
                 'reason': resp.reason,
@@ -471,6 +475,39 @@ async def get_options_chain(token: str, symbol: str) -> Dict:
     resp = await api_request('GET', url, token)
     return resp
 
+
+"""
+#####################################
+############# ALERTS ################
+#####################################
+"""
+
+
+async def get_quote_alert(token: str) -> Dict:
+    """
+    Get the account quote alerts
+    """
+    url = make_api_url('QUOTE_ALERTS')
+    resp = await api_request('GET', url, token)
+    return resp
+
+
+async def create_quote_alert(token: str, alert_json: dict) -> Dict:
+    """
+    Create a new quote alert
+    """
+    url = make_api_url('QUOTE_ALERTS')
+    resp = await api_request('POST', url, token, json_data=alert_json)
+    return resp
+
+
+async def delete_quote_alert(token: str, alert_id: str) -> Dict:
+    """
+    Delete a quote alert
+    """
+    url = make_api_url('QUOTE_ALERTS', alert_id=alert_id)
+    resp = await api_request('DELETE', url, token)
+    return resp
 
 """
 #########################################

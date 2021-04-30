@@ -479,9 +479,38 @@ async def main():
     resp = await api.get_options_chain(session_token, '/MES')
     print(resp)
 
+    """
+    ##########
+    # ALERTS #
+    ##########
+    """
+    # Create a new quote alert (Last, Bid, Ask, IV and for less than '<' or greater than '>')
+    # Note that using 'IV' in the 'field' is actually for 'IV Rank' alert, not pure IV
+    # Also works for futures but must be the entire symbol with forward slash and expiration code like '/ESU1'
+    alert_json = {
+        "field": "Last",
+        "operator": ">",
+        "threshold": "4200",
+        "symbol": "SPX"
+    }
+    resp = await api.create_quote_alert(session_token, alert_json=alert_json)
+    alert_id = resp.get('content').get('data').get('alert-external-id')
+    print(resp)
+
+    # Get the quote alerts
+    # Returned alerts will include 'completed-at' and 'triggered-at' if they have been triggered
+    resp = await api.get_quote_alert(session_token)
+    print(resp)
+
+    # Delete an alert using the alert ID
+    resp = await api.delete_quote_alert(session_token, alert_id=alert_id)
+    print(resp)
+
+    """
     ########
     # MISC #
     ########
+    """
     # Retrieve list of all current future products with symbol and product code
     resp = await api.get_instruments_futures(session_token)
     print(resp)
