@@ -77,6 +77,7 @@ def make_api_url(key: str, **kwargs):
         'BALANCES': f'/accounts/{account}/balances',
         'POSITIONS': f'/accounts/{account}/positions',
         'STATUS': f'/accounts/{account}/trading-status',
+        'CAPITAL_REQ': f'/margin/accounts/{account}',
 
         'TRANSACTIONS': f'/accounts/{account}/transactions'
                         f'?start-date={quote(start_date if start_date else "", safe="")}'
@@ -256,6 +257,14 @@ async def get_status(token: str, account_number: str) -> Dict:
     resp = await api_request('GET', url, token)
     return resp
 
+
+async def get_capital_req(token: str, account_number: str) -> Dict:
+    """
+    Retrieves the status of an account
+    """
+    url = make_api_url('CAPITAL_REQ', account=account_number)
+    resp = await api_request('GET', url, token)
+    return resp
 
 """
 #########################################

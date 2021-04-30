@@ -48,6 +48,11 @@ async def main():
     resp = await api.get_status(session_token, environ.get('TW_ACCOUNT', ""))
     print(resp)
 
+    # Get the margin/capital requirements of an account
+    # Also a workaround way to getting all the current positions in the account with extra details
+    resp = await api.get_capital_req(session_token, environ.get('TW_ACCOUNT', ""))
+    print(resp)
+
     # Get the data streamer token (for live data feed streamer)
     resp = await api.get_streamer_info(session_token)
     print(resp)
