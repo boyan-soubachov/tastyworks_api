@@ -232,6 +232,10 @@ async def main():
     resp = await api.get_orders(session_token, environ.get('TW_ACCOUNT', ""))
     print(resp)
 
+    # Can pass a symbol to get all last orders for that symbol (default last 10 orders)
+    resp = await api.get_orders(session_token, environ.get('TW_ACCOUNT', ""), symbol='SPY')
+    print(resp)
+
     # Can pass pagination to get less or more orders (orders max per page is 200) - Getting last 50 here
     resp = await api.get_orders(session_token, environ.get('TW_ACCOUNT', ""), per_page=50)
     print(resp)
