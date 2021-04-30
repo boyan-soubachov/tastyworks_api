@@ -4,6 +4,7 @@ import inspect
 from os import environ
 from datetime import date
 from urllib.parse import quote
+from typing import Dict
 
 
 async def is_error(resp, valid_list: list = None, error_list: list = None):
@@ -164,7 +165,7 @@ async def api_request(request_type: str, url: str, token: str = None, json_data:
 """
 
 
-async def session_start(username: str = None, password: str = None) -> dict:
+async def session_start(username: str = None, password: str = None) -> Dict:
     """
     Start a TW API session.
 
@@ -191,7 +192,7 @@ async def session_start(username: str = None, password: str = None) -> dict:
     return resp
 
 
-async def session_validate(token: str) -> dict:
+async def session_validate(token: str) -> Dict:
     """
     Validate the status of a TW API session using the session token
     """
@@ -200,7 +201,7 @@ async def session_validate(token: str) -> dict:
     return resp
 
 
-async def get_streamer_info(token: str) -> dict:
+async def get_streamer_info(token: str) -> Dict:
     """
     Get the streamer information including URL and token (take in the different TW session token)
     """
@@ -216,7 +217,7 @@ async def get_streamer_info(token: str) -> dict:
 """
 
 
-async def get_accounts(token: str) -> dict:
+async def get_accounts(token: str) -> Dict:
     """
     Requests the account numbers using the session token
     """
@@ -225,7 +226,7 @@ async def get_accounts(token: str) -> dict:
     return resp
 
 
-async def get_balances(token: str, account_number: str) -> dict:
+async def get_balances(token: str, account_number: str) -> Dict:
     """
     Requests the balances for a specific account number using the session token
     """
@@ -234,7 +235,7 @@ async def get_balances(token: str, account_number: str) -> dict:
     return resp
 
 
-async def get_positions(token: str, account_number: str) -> dict:
+async def get_positions(token: str, account_number: str) -> Dict:
     """
     Retrieves all the positions for a specific account number using the session token
     """
@@ -243,7 +244,7 @@ async def get_positions(token: str, account_number: str) -> dict:
     return resp
 
 
-async def get_status(token: str, account_number: str) -> dict:
+async def get_status(token: str, account_number: str) -> Dict:
     """
     Retrieves the status of an account
     """
@@ -261,7 +262,7 @@ async def get_status(token: str, account_number: str) -> dict:
 
 async def get_transactions(token: str, account_number: str = '', symbol: str = '',
                            start_date: date = None, end_date: date = None,
-                           per_page: int = None, page_number: int = None) -> dict:
+                           per_page: int = None, page_number: int = None) -> Dict:
     """
     Retrieves all the transactions for the TW API for the TW API for a specific account
     (limited to a max of 2000 per page)
@@ -297,7 +298,7 @@ async def get_transactions(token: str, account_number: str = '', symbol: str = '
 
 async def get_orders(token: str, account_number: str = '', symbol: str = '',
                      start_date: date = None, end_date: date = None,
-                     per_page: int = None, page_number: int = None) -> dict:
+                     per_page: int = None, page_number: int = None) -> Dict:
     """
     Retrieves all the transactions for the TW API for the TW API for a specific account
     (limited to a max of 200 per page)
@@ -331,7 +332,7 @@ async def get_orders(token: str, account_number: str = '', symbol: str = '',
     return resp
 
 
-async def get_orders_live(token: str, account_number: str) -> dict:
+async def get_orders_live(token: str, account_number: str) -> Dict:
     """
     Retrieves all the orders for today (working, closed, executed, etc.)
     """
@@ -341,7 +342,7 @@ async def get_orders_live(token: str, account_number: str) -> dict:
 
 
 async def route_order(token: str, account_number: str, order_json: dict,
-                      is_dry_run: bool = True, order_id: str = None) -> dict:
+                      is_dry_run: bool = True, order_id: str = None) -> Dict:
     """
     Place a dry-run (preview), route a live order or allow to modify an order by passing the additional "order_id".
 
@@ -370,7 +371,7 @@ async def route_order(token: str, account_number: str, order_json: dict,
     return resp
 
 
-async def cancel_order(token: str, account_number: str, order_id: str = None) -> dict:
+async def cancel_order(token: str, account_number: str, order_id: str = None) -> Dict:
     """
     Cancels an open order defined by "order_id"
     Args:
@@ -391,7 +392,7 @@ async def cancel_order(token: str, account_number: str, order_id: str = None) ->
     return resp
 
 
-async def fifty_percent_pop(token: str, pop_json: dict) -> dict:
+async def fifty_percent_pop(token: str, pop_json: dict) -> Dict:
     """
     Returns the response of the API server including statistical analysis data of a simulated order.
     JSON data include parameters that needs to be retrieved via market metrics and other API calls.
@@ -408,7 +409,7 @@ async def fifty_percent_pop(token: str, pop_json: dict) -> dict:
 """
 
 
-async def symbol_search(token: str, symbol: str) -> dict:
+async def symbol_search(token: str, symbol: str) -> Dict:
     """
     Performs a symbol search using Tastyworks API.
 
@@ -430,7 +431,7 @@ async def symbol_search(token: str, symbol: str) -> dict:
     return resp
 
 
-async def get_market_metrics(token: str, symbol_list: list) -> dict:
+async def get_market_metrics(token: str, symbol_list: list) -> Dict:
     """
     Get the market metrics for a symbol or a list of symbols
 
@@ -449,7 +450,7 @@ async def get_market_metrics(token: str, symbol_list: list) -> dict:
     return resp
 
 
-async def get_options_chain(token: str, symbol: str) -> dict:
+async def get_options_chain(token: str, symbol: str) -> Dict:
     """
     Get an option chain for an underlying symbol (Equity or Future).
 
@@ -478,7 +479,7 @@ async def get_options_chain(token: str, symbol: str) -> dict:
 """
 
 
-async def get_watchlists(token: str) -> dict:
+async def get_watchlists(token: str) -> Dict:
     """
     Retrieves the account personal watchlists
     """
@@ -487,7 +488,7 @@ async def get_watchlists(token: str) -> dict:
     return resp
 
 
-async def create_watchlist(token: str, watchlist_json: dict) -> dict:
+async def create_watchlist(token: str, watchlist_json: dict) -> Dict:
     """
     Creating a watchlist requires watchlist name and the JSON payload including the symbols to include
     TODO: Will fail if watchlist name already exists, we may want to check or catch the error
@@ -497,7 +498,7 @@ async def create_watchlist(token: str, watchlist_json: dict) -> dict:
     return resp
 
 
-async def update_watchlist(token: str, watchlist_name: str, watchlist_json: dict) -> dict:
+async def update_watchlist(token: str, watchlist_name: str, watchlist_json: dict) -> Dict:
     """
     Adding and removing a symbol from a list requires the watchlist name and a new JSON payload.
     """
@@ -506,7 +507,7 @@ async def update_watchlist(token: str, watchlist_name: str, watchlist_json: dict
     return resp
 
 
-async def delete_watchlist(token: str, watchlist_name: str) -> dict:
+async def delete_watchlist(token: str, watchlist_name: str) -> Dict:
     """
     Deleting a watchlist using its name and a DELETE method
     """
@@ -515,7 +516,7 @@ async def delete_watchlist(token: str, watchlist_name: str) -> dict:
     return resp
 
 
-async def get_watchlists_public(token: str) -> dict:
+async def get_watchlists_public(token: str) -> Dict:
     """
     Retrieves the public TW watchlists
 
@@ -532,7 +533,7 @@ async def get_watchlists_public(token: str) -> dict:
 """
 
 
-async def get_journal_entries(token: str, tag: str = None, journal_page_offset: str = None) -> dict:
+async def get_journal_entries(token: str, tag: str = None, journal_page_offset: str = None) -> Dict:
     """
     Retrieves the account journal entries for the first page (10 entries)
     Note: The tags don't seem to work when entering any Symbol, only tags seems to work (and must be exact tags!)
@@ -543,7 +544,7 @@ async def get_journal_entries(token: str, tag: str = None, journal_page_offset: 
     return resp
 
 
-async def add_journal_entry(token: str, entry_json: dict) -> dict:
+async def add_journal_entry(token: str, entry_json: dict) -> Dict:
     """
     Add a new journal entry. Entry can be linked to a specific order or not
     Passing the entry_id will allow to update/override the entry (entire JSON content needs to be sent)
@@ -553,7 +554,7 @@ async def add_journal_entry(token: str, entry_json: dict) -> dict:
     return resp
 
 
-async def update_journal_entry(token: str, entry_json: dict, entry_id: str = None) -> dict:
+async def update_journal_entry(token: str, entry_json: dict, entry_id: str = None) -> Dict:
     """
     Passing the entry_id will allow to update/override the entry via a PUT request
     Entire JSON content for the new entry needs to be sent as if creating a new entry
@@ -564,7 +565,7 @@ async def update_journal_entry(token: str, entry_json: dict, entry_id: str = Non
     return resp
 
 
-async def delete_journal_entry(token: str, entry_id: str = None) -> dict:
+async def delete_journal_entry(token: str, entry_id: str = None) -> Dict:
     """
     Delete a journal entry by its ID
     Will only return that the change has been accepted (no response from the API)
@@ -581,7 +582,7 @@ async def delete_journal_entry(token: str, entry_id: str = None) -> dict:
 """
 
 
-async def get_instruments_futures(token: str) -> dict:
+async def get_instruments_futures(token: str) -> Dict:
     """
     Retrieves a list of all current future products
     """
@@ -590,7 +591,7 @@ async def get_instruments_futures(token: str) -> dict:
     return resp
 
 
-async def get_instruments_precisions(token: str) -> dict:
+async def get_instruments_precisions(token: str) -> Dict:
     """
     Retrieves a list of the various decimal precision for TW available instruments including crypto pairs
     """
