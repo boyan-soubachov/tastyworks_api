@@ -273,18 +273,19 @@ async def main():
     ##################
     """
     # Does not yet work with Future Options
-    # TODO: Future options order leg symbol needs to also be figured out i.e "./MESM1EX2K1 210514P3900"
+    # TODO: Future options order leg symbol needs to also be figured out in the class i.e "./MESM1EX2K1 210514P3900"
     # Returns the order acknowledgement, warnings, buying power and fees sheet
     # This requires building the order and the legs
     # Hardcoding JSON message for the example here. It should be build dynamically using Order object/methods.
     # Purposefully not using the existing classes for this example to keep this low level API example.
 
     # Example of a stock buy order: GTD, limit order, buy to open, dry-run (i.e. preview)
+    gtc_date = (date.today() + timedelta(days=30)).strftime("%Y-%m-%d")
     order_json = {
         "source": "WBT",
         "order-type": "Limit",
         "time-in-force": "GTD",
-        "gtc-date": "2026-05-31",
+        "gtc-date": gtc_date,
         "price": "999.00",
         "price-effect": "Debit",
         "legs": [
