@@ -2,7 +2,7 @@ from datetime import date
 from decimal import Decimal
 from enum import Enum
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from tastyworks.models.security import Security
 from tastyworks.models.underlying import UnderlyingType
