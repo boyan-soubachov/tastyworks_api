@@ -31,7 +31,7 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
     }
 
     accounts = await TradingAccount.get_remote_accounts(session)
-    acct = accounts[1]
+    acct = accounts[0]
     LOGGER.info('Accounts available: %s', accounts)
 
     orders = await Order.get_remote_orders(session, acct)
@@ -124,13 +124,12 @@ def main():
     except Exception:
         LOGGER.exception('Exception in main loop')
     finally:
-        pass
-        # # find all futures/tasks still running and wait for them to finish
-        # pending_tasks = [
-        #     task for task in asyncio.Task.all_tasks() if not task.done()
-        # ]
-        # loop.run_until_complete(asyncio.gather(*pending_tasks))
-        # loop.close()
+        # find all futures/tasks still running and wait for them to finish
+        pending_tasks = [
+            task for task in asyncio.Task.all_tasks() if not task.done()
+        ]
+        loop.run_until_complete(asyncio.gather(*pending_tasks))
+        loop.close()
 
 
 if __name__ == '__main__':
