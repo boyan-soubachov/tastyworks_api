@@ -155,7 +155,7 @@ class TradingAccount(object):
 
     async def get_history(self, session, account):
         """
-        Get live Orders.
+        Get transaction history.
 
         Args:
             session (TastyAPISession): An active and logged-in session object against which to query.
