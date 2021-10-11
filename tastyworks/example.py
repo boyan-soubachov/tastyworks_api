@@ -1,21 +1,51 @@
 import asyncio
 import calendar
 import logging
-from os import environ
+import os
 from datetime import date, timedelta
-from decimal import Decimal
 
+import aiohttp
 from tastyworks.models import option_chain, underlying
-from tastyworks.models.option import Option, OptionType
-from tastyworks.models.order import (Order, OrderDetails, OrderPriceEffect,
-                                     OrderType)
+from tastyworks.models.order import (Order)
 from tastyworks.models.session import TastyAPISession
 from tastyworks.models.trading_account import TradingAccount
-from tastyworks.models.underlying import UnderlyingType
+from tastyworks.models.underlying import Underlying
+
 from tastyworks.streamer import DataStreamer
 from tastyworks.tastyworks_api import tasty_session
 
 LOGGER = logging.getLogger(__name__)
+
+
+async def get_watchlists(session):
+    async with aiohttp.request(
+            'GET',
+            f'{session.API_url}/public-watchlists',
+            headers=session.get_request_headers()) as response:
+        if response.status != 200:
+            raise Exception(f'Could not get watchlists')
+        resp = await response.json()
+
+        return resp['data']['items']
+
+
+async def _get_tasty_market_metrics(session, underlying):
+    async with aiohttp.request(
+            'GET',
+            f'{session.API_url}/market-metrics?symbols={underlying.ticker}',
+            headers=session.get_request_headers()) as response:
+        if response.status != 200:
+            raise Exception(f'Could not market metrics for symbol {underlying.ticker}')
+        resp = await response.json()
+
+        return resp['data']['items'][0]
+
+
+async def get_market_metrics(session, underlying: Underlying, expiration: date = None):
+    LOGGER.debug('Getting market metrics for ticker: %s', underlying.ticker)
+    data = await _get_tasty_market_metrics(session, underlying)
+    res = data
+    return res
 
 
 async def main_loop(session: TastyAPISession, streamer: DataStreamer):
@@ -63,6 +93,12 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
     chain = await option_chain.get_option_chain(session, undl)
     LOGGER.info('Chain strikes: %s', chain.get_all_strikes())
 
+    market_metrics = await get_market_metrics(session, undl)
+    LOGGER.info('market metrics: %s', market_metrics)
+
+    watchlists = await get_watchlists(session)
+    LOGGER.info('watchlists', watchlists)
+
     await streamer.add_data_sub(sub_values)
 
     async for item in streamer.listen():
@@ -83,7 +119,8 @@ def get_third_friday(d):
 
 
 def main():
-    tasty_client = tasty_session.create_new_session(environ.get('TW_USER', ""), environ.get('TW_PASSWORD', ""))
+    tasty_client = tasty_session.create_new_session(environ.get('TW_USER', ""),
+                                                    environ.get('TW_PASSWORD', ""))
 
     streamer = DataStreamer(tasty_client)
     LOGGER.info('Streamer token: %s' % streamer.get_streamer_token())
