@@ -26,7 +26,7 @@ tasty
 
 ## Usage
 
-Username and password are stored in environment variables, TW_USER and TW_PASSWORD respectively.
+Username and password are stored in environment variables, TW_USER and TW_PASSWORD respectively. For those with multiple TastyWorks accounts, TW_PREF can be used.
 
 ## Guidelines and caveats
 
