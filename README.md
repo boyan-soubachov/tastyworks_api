@@ -24,6 +24,10 @@ An example use is provided in `example.py` in the `tastyworks` folder. See for y
 tasty 
 ```
 
+## Usage
+
+Username and password are stored in environment variables, TW_USER and TW_PASSWORD respectively.
+
 ## Guidelines and caveats
 
 There are a few useful things to know which will help you get the most out of this API and use it in the way it was intended.
