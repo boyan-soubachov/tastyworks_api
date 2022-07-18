@@ -30,8 +30,9 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
     }
 
     accounts = await TradingAccount.get_remote_accounts(session)
-    acct = accounts[0]
+    acct = get_pref_account(accounts)
     LOGGER.info('Accounts available: %s', accounts)
+    LOGGER.info('Using account:      %s', acct.account_number)
 
     orders = await Order.get_remote_orders(session, acct)
     LOGGER.info('Number of active orders: %s', len(orders))
@@ -69,6 +70,19 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
         LOGGER.info('Received item: %s' % item.data)
 
 
+def get_pref_account(accounts):
+    acct = accounts[0]
+    pref_acct = environ.get('TW_PREF', "")
+    LOGGER.info('acct : %s', acct.account_number)
+
+    acct = accounts[0]
+    for ac in accounts:
+        if pref_acct.upper() == ac.account_number.upper():
+            acct = ac
+
+    return acct
+
+
 def get_third_friday(d):
     s = date(d.year, d.month, 15)
     candidate = s + timedelta(days=(calendar.FRIDAY - s.weekday()) % 7)
@@ -95,11 +109,12 @@ def main():
         LOGGER.exception('Exception in main loop')
     finally:
         # find all futures/tasks still running and wait for them to finish
-        pending_tasks = [
-            task for task in asyncio.Task.all_tasks() if not task.done()
-        ]
-        loop.run_until_complete(asyncio.gather(*pending_tasks))
-        loop.close()
+        if hasattr(asyncio.Task, 'all_tasks'):
+            pending_tasks = [
+                task for task in asyncio.Task.all_tasks() if not task.done()
+            ]
+            loop.run_until_complete(asyncio.gather(*pending_tasks))
+            loop.close()
 
 
 if __name__ == '__main__':
